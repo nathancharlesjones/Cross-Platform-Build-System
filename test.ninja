@@ -1,0 +1,10 @@
+# test.ninja
+
+common_var = 1
+
+rule test
+	command = echo common_var = $common_var
+
+build test: test
+
+default test
