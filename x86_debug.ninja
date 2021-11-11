@@ -1,0 +1,49 @@
+# build.ninja
+
+include x86.ninja
+
+common_flags = $common_flags $debug_flags
+
+#############################
+#                           #
+#   x86 defs                #
+#                           #
+#############################
+
+#x86_debug_name = blinky_x86_debug
+#x86_debug_build_dir = build/x86/debug
+#x86_debug_target = $x86_debug_name.elf
+
+#############################
+#                           #
+#   Build edges, x86        #
+#                           #
+#############################
+
+#build $x86_debug_build_dir/source/main.o: compile source/main.c
+#    compiler = gcc
+#    flags = $common_flags
+
+#build $x86_debug_build_dir/hardware/source/x86/x86.o: compile hardware/source/x86/x86.c
+#    compiler = gcc
+#    flags = $common_flags
+
+#build $x86_debug_build_dir/$x86_debug_target: link $x86_debug_build_dir/source/main.o $x86_debug_build_dir/hardware/source/x86/x86.o
+#    linker = gcc
+#    linker_flags = -Wl,--gc-sections,-Map,$x86_debug_build_dir/$x86_debug_name.map,--cref
+#    libraries = -lm
+
+#############################
+#                           #
+#   Build edges, STM32F1    #
+#                           #
+#############################
+
+
+#############################
+#                           #
+#   Default targets         #
+#                           #
+#############################
+
+#default $x86_debug_build_dir/$x86_debug_target
