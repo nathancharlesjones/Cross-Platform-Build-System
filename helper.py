@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 import os
+from functools import reduce
 
 def convert_list_to_str_for_printing(list, padding):
     return str(list).replace(", ",",\n" + " "*(padding + 1))

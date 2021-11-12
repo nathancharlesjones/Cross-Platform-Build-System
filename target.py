@@ -1,6 +1,6 @@
 from helper import (execute_shell_cmd, list_of_files_contains_c_files,
                     list_of_files_contains_cpp_files, list_of_files_contains_s_or_S_files,
-                    convert_list_to_str_for_printing)
+                    convert_list_to_str_for_printing, get_file_extension)
 import os
 import ninja_syntax
 
@@ -41,6 +41,7 @@ class target:
         self.local_dep_target_list = ["{0}/{1}".format(dep.build_dir,dep.target) for dep in self.local_dependencies]
         self.pre_build_cmds = pre_build_cmds
         self.post_build_cmds = post_build_cmds
+        self.obj_files = []
     
     def clean(self, verbose=False):
         execute_shell_cmd("find {0}".format(self.build_dir)+r" -mindepth 1 -maxdepth 1 -type d -exec rm -r {} \;", verbose)
@@ -98,7 +99,7 @@ class executable(target):
         ninja_file.build(
             outputs=self.target_file_and_path, 
             rule="link", 
-            inputs=self.object_files, 
+            inputs=self.obj_files, 
             implicit=[lib.target_file_and_path for lib in self.local_dependencies],
             variables=
             {
@@ -159,7 +160,7 @@ class library(target):
         ninja_file.build(
             outputs=self.target_file_and_path, 
             rule="archive", 
-            inputs=self.object_files, 
+            inputs=self.obj_files, 
             implicit=[lib.target_file_and_path for lib in self.local_dependencies],
             variables=
             {

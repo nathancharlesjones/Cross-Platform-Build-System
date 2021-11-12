@@ -42,6 +42,7 @@ def generate_build_dot_ninja_from_targets(targets):
                 define_str = ' '.join(["-D"+define for define in targets[target].defines])
                 include_dirs_str = ' '.join(["-I "+inc_dir for inc_dir in targets[target].include_dirs])
                 obj_file = "{0}/{1}".format(targets[target].build_dir,source_file.replace(get_file_extension(source_file), ".o"))
+                self.obj_files.append(obj_file)
                 ninja_file.build(
                     outputs=obj_file, 
                     rule="compile", 

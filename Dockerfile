@@ -34,8 +34,12 @@ ENV PATH "/opt/gcc-arm-none-eabi-10.3-2021.10/bin:$PATH"
 RUN apt-get install -y python3-pip
 RUN pip3 install cmake
 
+# Get Ninja
+RUN RUN apt-get install -y ninja-build
+RUN pip3 install ninja_syntax
+
 # Get other useful tools
-RUN apt-get install -y zip git-all ninja-build
+RUN apt-get install -y zip git-all docker
 
 # Get sample dependency (mpaland/printf)
 # User must copy this folder (and any others) to the correct location once a container is built and started
