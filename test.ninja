@@ -1,25 +1,20 @@
 # test.ninja
 
-rule pre_cmd_1
-    command = echo pre_cmd_1 $in
+rule pre_cmd_exe
+    command = echo pre_cmd_1 $in && echo pre_cmd_2
 
-rule pre_cmd_2
-    command = echo pre_cmd_2
-
-rule post_cmd_1
+rule post_cmd_exe
     command = echo post_cmd_1 $in
 
 rule test
     command = echo $in
 
-build pre_cmd_1: pre_cmd_1
+build post_cmd_exe: post_cmd_exe | exe_file
 
-build pre_cmd_2: pre_cmd_2
+build pre_cmd_exe: pre_cmd_exe
 
-build post_cmd_1: post_cmd_1
+build exe_file: test exe_file_inputs | pre_cmd_exe
 
-build exe_file: test linking$ exe | pre_cmd_1 pre_cmd_2
-
-build exe: phony | exe_file post_cmd_1
+build exe: phony | post_cmd_exe
 
 default exe

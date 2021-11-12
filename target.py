@@ -1,6 +1,4 @@
-from helper import (execute_shell_cmd, get_dependencies_list,
-                    file_does_not_exist, at_least_one_dependency_is_newer_than,
-                    get_file_extension, list_of_files_contains_c_files,
+from helper import (execute_shell_cmd, list_of_files_contains_c_files,
                     list_of_files_contains_cpp_files, list_of_files_contains_s_or_S_files,
                     convert_list_to_str_for_printing)
 import os
@@ -37,9 +35,6 @@ class target:
         self.target = target
         self.target_file_and_path = "{0}/{1}".format(self.build_dir, self.target)
         self.include_dirs = include_dirs
-        self.object_files = []
-        for this_source_file in self.source_files:
-            self.object_files.append("{0}/{1}".format(self.build_dir,this_source_file.replace(get_file_extension(this_source_file), ".o")))
         self.libraries = libraries
         self.library_dirs = library_dirs
         self.local_dependencies = local_dependencies
@@ -47,63 +42,6 @@ class target:
         self.pre_build_cmds = pre_build_cmds
         self.post_build_cmds = post_build_cmds
     
-    def build(self, verbose=False):
-        for pre_build_cmd in self.pre_build_cmds:
-            execute_shell_cmd(pre_build_cmd, verbose)
-        
-        # For build.ninja:
-        #  - How to do pre-commands?
-        #  - Write rules
-        #  - Write compile build edges (with depfiles)
-        #  - Write target build edge
-        #  - Write default?
-        #  - Add self-rebuilding rule?
-        #  - How to do post-commands?
-
-        # Put all of this in one file?
-        # How to change file paths so I can call this script from the project folder?
-        # Should .ninja files be in root folder or in build folders?
-        # Add support for 'subninja's somehow
-        # Prune files
-        # Add configure rule/build edge
-        with open('{0}.ninja'.format(self.name), 'w') as build_file:
-            ninja_file = ninja_syntax.Writer(build_file)
-
-            # Same for both executables and libraries?
-            ninja_file.variable('defines', ' '.join(["-D"+define for define in self.defines]))
-            ninja_file.variable('include_dirs',' '.join(["-I "+inc_dir for inc_dir in self.include_dirs]))
-
-            ninja_file.rule(name="compile", command="$compiler $flags $defines $include_dirs -MMD -MF $out.d -c $in -o $out", depfile="$out.d")
-            
-            # Move this to the executable class somehow.
-            ninja_file.rule(name="link", command="$linker $linker_flags $linker_script $defines $include_dirs $in $library_dirs $libraries -o $out")
-            
-            # Add archive rule
-
-            for idx, obj_file in enumerate(self.object_files):
-                # Expecting objects and sources to occur in the same order feels brittle
-                source_file = self.source_files[idx]
-                if get_file_extension(source_file) == ".cpp":
-                    program = self.cpp_compiler
-                    flags = self.cpp_flags
-                elif get_file_extension(source_file) == ".c":
-                    program = self.c_compiler
-                    flags = self.c_flags
-                elif get_file_extension(source_file) == ".s" or get_file_extension(source_file) == ".S":
-                    program = self.assembler
-                    flags = self.as_flags
-                else:
-                    raise ValueError("Unrecognized file extension in source files: {0}".format(get_file_extension(source_file)))
-                ninja_file.build(outputs=obj_file, rule="compile", inputs=source_file, variables={'compiler':program, 'flags':' '.join(flags)})
-
-            # Put this in executable class somehow. Also add library build edge.
-            library_dirs_str = ' '.join(["-L "+lib_dir for lib_dir in self.library_dirs])
-            libraries_str = ' '.join(["-l"+lib for lib in self.libraries])
-            ninja_file.build(outputs=self.target_file_and_path, rule="link", inputs=self.object_files, variables={'linker':self.linker, 'linker_flags':' '.join(self.linker_flags), 'linker_script':"-T " + self.linker_script, 'library_dirs':library_dirs_str, 'libraries':libraries_str})
-
-        for post_build_cmd in self.post_build_cmds:
-            execute_shell_cmd(post_build_cmd, verbose)
-
     def clean(self, verbose=False):
         execute_shell_cmd("find {0}".format(self.build_dir)+r" -mindepth 1 -maxdepth 1 -type d -exec rm -r {} \;", verbose)
     
@@ -119,33 +57,14 @@ class target:
         elif cmd == 'build':
             self.build(verbose)
 
-    def form_build_cmd(self, verbose=False):
-        pass
-    
-    def get_dep_file_and_path_from_obj_file_and_path(self, obj_file_and_path, verbose=False):
-        return obj_file_and_path.replace(".o",".d")
-
-    def get_obj_file_and_path_from_source_file(self, source_file, verbose=False):
-        obj_file = source_file.replace(get_file_extension(source_file),".o")
-        return "{0}/{1}".format(self.build_dir,obj_file)
-
-    def make_build_dir_for_obj_file(self, source_file, verbose=False):
-        path, filename = os.path.split(source_file)
-        execute_shell_cmd("mkdir -p {0}/{1}".format(self.build_dir, path), verbose)
-
-    def object_file_needs_building(self, obj_file_and_path, verbose=False):
-        dep_file_and_path = self.get_dep_file_and_path_from_obj_file_and_path(obj_file_and_path)
-        dep_list = get_dependencies_list(dep_file_and_path)
-        return file_does_not_exist(obj_file_and_path) or file_does_not_exist(dep_file_and_path) or at_least_one_dependency_is_newer_than(obj_file_and_path, dep_list)
-
     def purify(self, verbose=False):
         execute_shell_cmd("rm -r -f {0}".format(self.build_dir), verbose)
 
     def show(self, verbose=False):
-        pass
-
-    def target_needs_building(self, verbose=False):
-        return file_does_not_exist(self.target_file_and_path) or at_least_one_dependency_is_newer_than(self.target_file_and_path, self.object_files+self.local_dep_target_list)
+        if not verbose:
+            print("- {0}".format(self.name))
+        else:
+            print(self)
 
     def zip(self, verbose=False):
         execute_shell_cmd("zip -r {0}/{1}.zip {2} {3}".format(self.build_dir,self.name,self.target_file_and_path,self.local_dep_target_list), verbose)
@@ -171,21 +90,27 @@ class executable(target):
         self.linker_flags = linker_flags
         self.linker_script = linker_script
 
-    def form_build_cmd(self, verbose=False):
-        linker_flags_str = ' '.join(self.linker_flags)
-        defines_str = ' '.join(["-D"+define for define in self.defines])
+    def add_final_build_edge(self, ninja_file):
+        define_str = ' '.join(["-D"+define for define in self.defines])
         include_dirs_str = ' '.join(["-I "+inc_dir for inc_dir in self.include_dirs])
-        object_files_str = ' '.join(self.object_files)
         library_dirs_str = ' '.join(["-L "+lib_dir for lib_dir in self.library_dirs])
         libraries_str = ' '.join(["-l"+lib for lib in self.libraries])
-        linker_script_with_flag_if_present = '-T {0}'.format(self.linker_script) if self.linker_script != '' else ''
-        return " ".join([self.linker,linker_flags_str,linker_script_with_flag_if_present,defines_str,include_dirs_str,object_files_str,library_dirs_str,libraries_str,"-o",self.target_file_and_path])
-
-    def show(self, verbose=False):
-        if not verbose:
-            print("- {0}".format(self.name))
-        else:
-            print(self)
+        ninja_file.build(
+            outputs=self.target_file_and_path, 
+            rule="link", 
+            inputs=self.object_files, 
+            implicit=[lib.target_file_and_path for lib in self.local_dependencies],
+            variables=
+            {
+                'linker':self.linker,
+                'linker_flags':' '.join(self.linker_flags),
+                'linker_script':"-T " + self.linker_script,
+                'defines':define_str,
+                'include_dirs':include_dirs_str,
+                'library_dirs':library_dirs_str,
+                'libraries':libraries_str
+            }
+        )
 
     def __str__(self):
         padding = self.print_padding
@@ -229,17 +154,20 @@ class library(target):
         self.archiver = archiver
         self.archiver_flags = archiver_flags
 
-    def form_build_cmd(self, verbose=False):
-        archiver_flags_str = ' '.join(self.archiver_flags)
-        defines_str = ' '.join(["-D"+define for define in self.defines])
-        object_files_str = ' '.join(self.object_files)
-        return " ".join([self.archiver,archiver_flags_str,defines_str,self.target_file_and_path,object_files_str])
-
-    def show(self, verbose=False):
-        if not verbose:
-            print("- {0}".format(self.name))
-        else:
-            print(self)
+    def add_final_build_edge(self, ninja_file):
+        define_str = ' '.join(["-D"+define for define in self.defines])
+        ninja_file.build(
+            outputs=self.target_file_and_path, 
+            rule="archive", 
+            inputs=self.object_files, 
+            implicit=[lib.target_file_and_path for lib in self.local_dependencies],
+            variables=
+            {
+                'archiver':self.archiver,
+                'flags':' '.join(self.archiver_flags),
+                'defines':define_str
+            }
+        )
 
     def __str__(self):
         padding = self.print_padding
