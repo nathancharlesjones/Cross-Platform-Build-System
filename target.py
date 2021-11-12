@@ -1,14 +1,15 @@
-from helper import (execute_shell_cmd, find, get_dependencies_list,
+from helper import (execute_shell_cmd, get_dependencies_list,
                     file_does_not_exist, at_least_one_dependency_is_newer_than,
                     get_file_extension, list_of_files_contains_c_files,
                     list_of_files_contains_cpp_files, list_of_files_contains_s_or_S_files,
                     convert_list_to_str_for_printing)
 import os
+import ninja_syntax
 
 class target:
     """ Parent class for defining project targets. """
 
-    self.print_padding = 25
+    print_padding = 25
 
     def __init__(self,build_dir,target,source_files,name='unnamed target',
         assembler='',as_flags=[],c_compiler='',c_flags=[],cpp_compiler='',cpp_flags=[],
@@ -50,14 +51,49 @@ class target:
         for pre_build_cmd in self.pre_build_cmds:
             execute_shell_cmd(pre_build_cmd, verbose)
         
-        self.compile_object_files(verbose)
-        self.build_local_dependencies(verbose)
+        # For build.ninja:
+        #  - How to do pre-commands?
+        #  - Write rules
+        #  - Write compile build edges (with depfiles)
+        #  - Write target build edge
+        #  - Write default?
+        #  - Add self-rebuilding rule?
+        #  - How to do post-commands?
+        with open('{0}.ninja'.format(self.name), 'w') as build_file:
+            ninja_file = ninja_syntax.Writer(build_file)
+
+            ninja_file.variable('defines', ' '.join(["-D"+define for define in self.defines]))
+            ninja_file.variable('include_dirs',' '.join(["-I "+inc_dir for inc_dir in self.include_dirs]))
+
+            ninja_file.rule(name="compile", command="$compiler $flags $defines $include_dirs -MMD -MF $out.d -c $in -o $out", depfile="$out.d")
+            ninja_file.rule(name="link", command="$linker $linker_flags $linker_script $defines $include_dirs $in $library_dirs $libraries -o $out")
+
+            for idx, obj_file in enumerate(self.object_files):
+                # Expecting objects and sources to occur in the same order feels brittle
+                source_file = self.source_files[idx]
+                if get_file_extension(source_file) == ".cpp":
+                    program = self.cpp_compiler
+                    flags = self.cpp_flags
+                elif get_file_extension(source_file) == ".c":
+                    program = self.c_compiler
+                    flags = self.c_flags
+                elif get_file_extension(source_file) == ".s" or get_file_extension(source_file) == ".S":
+                    program = self.assembler
+                    flags = self.as_flags
+                else:
+                    raise ValueError("Unrecognized file extension in source files: {0}".format(get_file_extension(source_file)))
+                ninja_file.build(outputs=obj_file, rule="compile", inputs=source_file, variables={'compiler':program, 'flags':' '.join(flags)})
+
+            ninja_file.build(outputs=self.target_file_and_path, rule="link", inputs=self.object_files, variables={'linker':self.linker, 'linker_flags':' '.join(self.linker_flags), 'linker_script':self.linker_script, 'library_dirs':' '.join(self.library_dirs), 'libraries':' '.join(self.libraries)})
+
+        #self.compile_object_files(verbose)
+        #self.build_local_dependencies(verbose)
         
-        if self.target_needs_building():
-            build_cmd = self.form_build_cmd()
-            execute_shell_cmd(build_cmd, verbose)
-        else:
-            print("Nothing to be done for {0}".format(self.name))
+        #if self.target_needs_building():
+        #    build_cmd = self.form_build_cmd()
+        #    execute_shell_cmd(build_cmd, verbose)
+        #else:
+        #    print("Nothing to be done for {0}".format(self.name))
         
         for post_build_cmd in self.post_build_cmds:
             execute_shell_cmd(post_build_cmd, verbose)

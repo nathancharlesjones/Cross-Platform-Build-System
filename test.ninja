@@ -1,10 +1,25 @@
 # test.ninja
 
-common_var = 1
+rule pre_cmd_1
+    command = echo pre_cmd_1 $in
+
+rule pre_cmd_2
+    command = echo pre_cmd_2
+
+rule post_cmd_1
+    command = echo post_cmd_1 $in
 
 rule test
-	command = echo common_var = $common_var
+    command = echo $in
 
-build test: test
+build pre_cmd_1: pre_cmd_1
 
-default test
+build pre_cmd_2: pre_cmd_2
+
+build post_cmd_1: post_cmd_1
+
+build exe_file: test linking$ exe | pre_cmd_1 pre_cmd_2
+
+build exe: phony | exe_file post_cmd_1
+
+default exe

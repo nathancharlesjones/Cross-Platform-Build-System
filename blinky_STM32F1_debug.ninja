@@ -1,0 +1,159 @@
+defines = -DUSE_HAL_DRIVER -DSTM32F103xB
+include_dirs = -I include -I hardware/include -I $
+    hardware/source/STM32F1/include -I $
+    libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Inc -I $
+    libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Inc/Legacy -I $
+    libraries/STM32CubeF1/CMSIS/Device/ST/STM32F1xx/Include -I $
+    libraries/STM32CubeF1/CMSIS/Include -I libraries/STM32CubeF1/CMSIS/Include
+rule compile
+  command = $compiler $flags $defines $include_dirs -MMD -MF $out.d -c $in $
+      -o $out
+  depfile = $out.d
+rule link
+  command = $linker $linker_flags $linker_script $defines $include_dirs $in $
+      $library_dirs $libraries -o $out
+build build/STM32F1/debug/source/main.o: compile source/main.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build build/STM32F1/debug/hardware/source/STM32F1/source/STM32F1.o: compile $
+    hardware/source/STM32F1/source/STM32F1.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/hardware/source/STM32F1/source/stm32f1xx_hal_msp.o: $
+    compile hardware/source/STM32F1/source/stm32f1xx_hal_msp.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build build/STM32F1/debug/hardware/source/STM32F1/source/stm32f1xx_it.o: $
+    compile hardware/source/STM32F1/source/stm32f1xx_it.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/hardware/source/STM32F1/source/system_stm32f1xx.o: $
+    compile hardware/source/STM32F1/source/system_stm32f1xx.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.o: $
+    compile $
+    libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.o: $
+    compile libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.o: $
+    compile $
+    libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o: $
+    compile libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.o: $
+    compile libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.o: $
+    compile $
+    libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.o: $
+    compile $
+    libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.o: $
+    compile libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.o: $
+    compile $
+    libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.o: $
+    compile libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.o: $
+    compile $
+    libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.o: $
+    compile $
+    libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.o: $
+    compile $
+    libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c
+  compiler = arm-none-eabi-gcc
+  flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
+      -mcpu=cortex-m3 -mthumb
+build $
+    build/STM32F1/debug/hardware/source/STM32F1/source/startup_stm32f103xb.o: $
+    compile hardware/source/STM32F1/source/startup_stm32f103xb.s
+  compiler = arm-none-eabi-gcc
+  flags = -x assembler-with-cpp -std=c11 -Wall -ffunction-sections $
+      -fdata-sections -mcpu=cortex-m3 -mthumb
+build build/STM32F1/debug/blinky_STM32F1_debug.elf: link $
+    build/STM32F1/debug/source/main.o $
+    build/STM32F1/debug/hardware/source/STM32F1/source/STM32F1.o $
+    build/STM32F1/debug/hardware/source/STM32F1/source/stm32f1xx_hal_msp.o $
+    build/STM32F1/debug/hardware/source/STM32F1/source/stm32f1xx_it.o $
+    build/STM32F1/debug/hardware/source/STM32F1/source/system_stm32f1xx.o $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.o $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.o $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.o $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.o $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.o $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.o $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.o $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.o $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.o $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.o $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.o $
+    build/STM32F1/debug/libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.o $
+    build/STM32F1/debug/hardware/source/STM32F1/source/startup_stm32f103xb.o
+  linker = arm-none-eabi-gcc
+  linker_flags = -Wl,--gc-sections $
+      -Wl,-Map,build/STM32F1/debug/blinky_STM32F1_debug.map,--cref $
+      --specs=nano.specs -mcpu=cortex-m3 -mthumb
+  linker_script = hardware/source/STM32F1/linker-script/STM32F103C8Tx_FLASH.ld
+  library_dirs = 
+  libraries = m c nosys
