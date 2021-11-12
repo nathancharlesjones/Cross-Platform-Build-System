@@ -108,8 +108,8 @@ STM32F1_debug = target.executable(
 	include_dirs 		= 	include_dirs,
 	libraries 			= 	libraries_common + \
 							["c", "nosys"],
-	post_build_cmds 	= 	["arm-none-eabi-size {0}/{1}".format(STM32F1_debug_build_dir, target_str.format(STM32F1_debug_name)),
-							 "arm-none-eabi-objcopy -O binary -S {0}/{1} {0}/{2}.bin".format(STM32F1_debug_build_dir, target_str.format(STM32F1_debug_name), STM32F1_debug_name)]
+	#post_build_cmds 	= 	["arm-none-eabi-size {0}/{1}".format(STM32F1_debug_build_dir, target_str.format(STM32F1_debug_name)),
+#							 "arm-none-eabi-objcopy -O binary -S {0}/{1} {0}/{2}.bin".format(STM32F1_debug_build_dir, target_str.format(STM32F1_debug_name), STM32F1_debug_name)]
 )
 
 targets[STM32F1_debug.name] = STM32F1_debug
