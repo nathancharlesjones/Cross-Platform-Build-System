@@ -29,6 +29,8 @@ def main():
     #  - Change container name?
     #  - Generate build.ninja
     #  - Execute ninja command
+    #  - Run host executable
+    #  - Run tests
     #  - Purify
     #  - Zip
     #  - List
