@@ -48,6 +48,7 @@ class target:
         self.post_build_cmds = post_build_cmds
     
     def build(self, verbose=False):
+        print("inside build")
         for pre_build_cmd in self.pre_build_cmds:
             execute_shell_cmd(pre_build_cmd, verbose)
         
@@ -59,7 +60,7 @@ class target:
         #  - Write default?
         #  - Add self-rebuilding rule?
         #  - How to do post-commands?
-        with open('{0}.ninja'.format(self.name), 'w') as build_file:
+        with open('../{0}.ninja'.format(self.name), 'w') as build_file:
             ninja_file = ninja_syntax.Writer(build_file)
 
             ninja_file.variable('defines', ' '.join(["-D"+define for define in self.defines]))
@@ -84,7 +85,12 @@ class target:
                     raise ValueError("Unrecognized file extension in source files: {0}".format(get_file_extension(source_file)))
                 ninja_file.build(outputs=obj_file, rule="compile", inputs=source_file, variables={'compiler':program, 'flags':' '.join(flags)})
 
-            ninja_file.build(outputs=self.target_file_and_path, rule="link", inputs=self.object_files, variables={'linker':self.linker, 'linker_flags':' '.join(self.linker_flags), 'linker_script':self.linker_script, 'library_dirs':' '.join(self.library_dirs), 'libraries':' '.join(self.libraries)})
+
+            print("here")
+            library_dirs_str = ' '.join(["-L "+lib_dir for lib_dir in self.library_dirs])
+            libraries_str = ' '.join(["-l"+lib for lib in self.libraries])
+            print(libraries_str)
+            ninja_file.build(outputs=self.target_file_and_path, rule="link", inputs=self.object_files, variables={'linker':self.linker, 'linker_flags':' '.join(self.linker_flags), 'linker_script':self.linker_script, 'library_dirs':library_dirs_str, 'libraries':libraries_str})
 
         #self.compile_object_files(verbose)
         #self.build_local_dependencies(verbose)
