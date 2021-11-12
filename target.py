@@ -48,7 +48,6 @@ class target:
         self.post_build_cmds = post_build_cmds
     
     def build(self, verbose=False):
-        print("inside build")
         for pre_build_cmd in self.pre_build_cmds:
             execute_shell_cmd(pre_build_cmd, verbose)
         
@@ -60,14 +59,26 @@ class target:
         #  - Write default?
         #  - Add self-rebuilding rule?
         #  - How to do post-commands?
-        with open('../{0}.ninja'.format(self.name), 'w') as build_file:
+
+        # Put all of this in one file?
+        # How to change file paths so I can call this script from the project folder?
+        # Should .ninja files be in root folder or in build folders?
+        # Add support for 'subninja's somehow
+        # Prune files
+        # Add configure rule/build edge
+        with open('{0}.ninja'.format(self.name), 'w') as build_file:
             ninja_file = ninja_syntax.Writer(build_file)
 
+            # Same for both executables and libraries?
             ninja_file.variable('defines', ' '.join(["-D"+define for define in self.defines]))
             ninja_file.variable('include_dirs',' '.join(["-I "+inc_dir for inc_dir in self.include_dirs]))
 
             ninja_file.rule(name="compile", command="$compiler $flags $defines $include_dirs -MMD -MF $out.d -c $in -o $out", depfile="$out.d")
+            
+            # Move this to the executable class somehow.
             ninja_file.rule(name="link", command="$linker $linker_flags $linker_script $defines $include_dirs $in $library_dirs $libraries -o $out")
+            
+            # Add archive rule
 
             for idx, obj_file in enumerate(self.object_files):
                 # Expecting objects and sources to occur in the same order feels brittle
@@ -85,60 +96,17 @@ class target:
                     raise ValueError("Unrecognized file extension in source files: {0}".format(get_file_extension(source_file)))
                 ninja_file.build(outputs=obj_file, rule="compile", inputs=source_file, variables={'compiler':program, 'flags':' '.join(flags)})
 
-
-            print("here")
+            # Put this in executable class somehow. Also add library build edge.
             library_dirs_str = ' '.join(["-L "+lib_dir for lib_dir in self.library_dirs])
             libraries_str = ' '.join(["-l"+lib for lib in self.libraries])
-            print(libraries_str)
-            ninja_file.build(outputs=self.target_file_and_path, rule="link", inputs=self.object_files, variables={'linker':self.linker, 'linker_flags':' '.join(self.linker_flags), 'linker_script':self.linker_script, 'library_dirs':library_dirs_str, 'libraries':libraries_str})
+            ninja_file.build(outputs=self.target_file_and_path, rule="link", inputs=self.object_files, variables={'linker':self.linker, 'linker_flags':' '.join(self.linker_flags), 'linker_script':"-T " + self.linker_script, 'library_dirs':library_dirs_str, 'libraries':libraries_str})
 
-        #self.compile_object_files(verbose)
-        #self.build_local_dependencies(verbose)
-        
-        #if self.target_needs_building():
-        #    build_cmd = self.form_build_cmd()
-        #    execute_shell_cmd(build_cmd, verbose)
-        #else:
-        #    print("Nothing to be done for {0}".format(self.name))
-        
         for post_build_cmd in self.post_build_cmds:
             execute_shell_cmd(post_build_cmd, verbose)
-
-    def build_local_dependencies(self, verbose=False):
-        for this_target in self.local_dependencies:
-            this_target.build()
 
     def clean(self, verbose=False):
         execute_shell_cmd("find {0}".format(self.build_dir)+r" -mindepth 1 -maxdepth 1 -type d -exec rm -r {} \;", verbose)
     
-    def compile_object_files(self, verbose=False):
-        for this_source_file in self.source_files:
-            self.make_build_dir_for_obj_file(this_source_file)
-
-            if get_file_extension(this_source_file) == ".cpp":
-                program = self.cpp_compiler
-                flags = self.cpp_flags
-            elif get_file_extension(this_source_file) == ".c":
-                program = self.c_compiler
-                flags = self.c_flags
-            elif get_file_extension(this_source_file) == ".s" or get_file_extension(this_source_file) == ".S":
-                program = self.assembler
-                flags = self.as_flags
-            else:
-                raise ValueError("Unrecognized file extension in source files: {0}".format(get_file_extension(this_source_file)))
-
-            obj_file_and_path = self.get_obj_file_and_path_from_source_file(this_source_file)
-                
-            if self.object_file_needs_building(obj_file_and_path):
-                flags_str = ' '.join(flags)
-                defines_str = ' '.join(["-D"+define for define in self.defines])
-                include_dirs_str = ' '.join(["-I "+inc_dir for inc_dir in self.include_dirs])
-                dep_file_and_path = self.get_dep_file_and_path_from_obj_file_and_path(obj_file_and_path)
-                compile_obj_file_cmd = " ".join([program,flags_str,defines_str,include_dirs_str,"-MMD -MF",dep_file_and_path,"-c",this_source_file,"-o",obj_file_and_path])
-                execute_shell_cmd(compile_obj_file_cmd, verbose)
-            else:
-                print("Nothing to be done for {0}".format(obj_file_and_path))
-
     def execute(self, cmd, verbose=False):
         if cmd == 'clean':
             self.clean(verbose)
