@@ -1,28 +1,38 @@
 #! /usr/bin/env python3
 
+from helper import execute_shell_cmd
+from project_targets import targets
 import argparse
 import subprocess
 import docker
 import os
 
-def execute_shell_cmd(cmd, verbose):
-    if verbose:
-        print("Executing: " + cmd)
-    process = subprocess.run([cmd], shell=True, text=True)
-    if verbose and process.stdout:
-        print("Output: " + process.stdout)
-
 def main():
     parser = argparse.ArgumentParser(description="Helper script for interacting with an embedded systems project.")
-    #parser.add_argument('-n', '--ninja', action='store', help='Use Docker to run the ninja command which follows this flag. Multi-word commands should be wrapped in single-quotes.')
-    #parser.add_argument('-t', '--target', action='store', dest='target', default='all', help='Specify a single target to be built, cleaned, purified, or zipped. All targets are built if none is specified.')
-    #non_build_option_group = parser.add_mutually_exclusive_group(required=True)
-    #non_build_option_group.add_argument('-b', '--build', action='store_const', const='build', dest='execute', help='Build the specified target (or all targets if no target was specified).')
-    #non_build_option_group.add_argument('-c', '--clean', action='store_const', const='clean', dest='execute', help='Clean the build folder for the specified target (or for all targets if no target was specified). Removes all files (such as object and dependency files) EXCEPT for each of the build targets and any zipped folders.')
-    #non_build_option_group.add_argument('-p', '--purify', action='store_const', const='purify', dest='execute', help='Purify the build folder. Removes the build folder and all subfiles and subdirectories for each target.')
-    #non_build_option_group.add_argument('-z', '--zip', action='store_const', const='zip', dest='execute', help='Purify the build folder. Removes the build folder and all subfiles and subdirectories for each target.')
-    #non_build_option_group.add_argument('-l', '--list', action='store_const', const='list', dest='execute', help="List the available target names, as defined in 'project_targets.py'. When used with verbose option, list all settings for all available targets.")
-    #parser.add_argument('-v', '--verbose', action='store_true', default=False, help='Verbose output. Show the recipe configuration prior to it being built and show all executing commands as they are being run. (Note: Errors are shown regardless of this setting.)')
+    parser.add_argument('-v', '--verbose', action='store_true', default=False, help='Verbose output. Show the recipe configuration prior to it being built and show all executing commands as they are being run. (Note: Errors are shown regardless of this setting.)')
+    subparsers = parser.add_subparsers(dest='action', required=True)
+    
+    build_docker_container = subparsers.add_parser('build_docker', help="Builds the Docker container specified in a Dockerfile in the same folder as this script with the name specified.")
+    build_docker_container.add_argument('-n', '--name', help="Override the name in <> with a new name.")
+
+    build_ninja_file = subparsers.add_parser('build_ninja', help="(Re)Build the file 'build.ninja' according to the project specifications defined in 'project_targets.py'.")
+
+    run_docker_cmd = subparsers.add_parser('run', help="Run the specified command in Docker.")
+    run_docker_cmd.add_argument('-c', '--command', required=True, help="The command to run.")
+    run_docker_cmd.add_argument('-n', '--name', help="Override the name in <> with a new name.")
+
+    flash_binary = subparsers.add_parser('flash', help="Flash the specified binary to an attached MCU.")
+    flash_binary.add_argument('-t', '--target', choices=list(targets), help="Target that is to be flashed to the attached MCU.")
+
+    list_targets = subparsers.add_parser('list', help="List the available targets (specified in 'project_targets.py'). Use with '-v' to see all components of the specified target.")
+    list_targets.add_argument('-t', '--target', choices=list(targets), help="Target to be listed.")
+
+    start_debug_session = subparsers.add_parser('debug', help="List the available targets (specified in 'project_targets.py'). Use with '-v' to see all components of the specified target.")
+
+    git_push = subparsers.add_parser('push', help="Execute 'git add . && git commit -m MESSAGE && git push'.")
+    git_push.add_argument('-m', '--message', required=True, help="The commit message.")
+    git_push.add_argument('-u', '--username', help="Override the defualt username.")
+    git_push.add_argument('-p', '--password', help="Override the default password.")
 
     # New CLIs:
     #  1) Build Docker container -c --build-container
@@ -48,12 +58,31 @@ def main():
     #     - Allow for overridding the UN/PW on command line
     #  8) Verbose output -v --verbose
     args = parser.parse_args()
-
-    client = docker.from_env()
-
-    print(client.containers.run('devenv-simple-build-system', volumes=["{0}:/app".format(os.getcwd())], command='ninja').decode("utf-8"))
-    #execute_shell_cmd("docker run -it --rm -v PWD:/app devenv-simple-build-system /bin/bash -c 'echo Starting program'", True)
-    #execute_shell_cmd("docker run -it --rm -v $\{PWD}:/app devenv-simple-build-system /bin/bash -c '{0}'".format(args.ninja), True)
+    print(args)
+    
+    if args.action == 'build_docker':
+        # Build docker file
+        pass
+    elif args.action == 'build_ninja':
+        generate_build_dot_ninja_from_targets(targets)
+    elif args.action == 'run':
+        client = docker.from_env()
+        print(client.containers.run('devenv-simple-build-system', volumes=["{0}:/app".format(os.getcwd())], command=args.command).decode("utf-8"))
+    elif args.action == 'flash':
+        pass
+    elif args.action == 'list':
+        if args.target:
+            print(targets[args.target])
+        else:
+            for target in targets:
+                print(targets[target])
+    elif args.action == 'debug':
+        #print(client.containers.run('devenv-simple-build-system', volumes=["{0}:/app".format(os.getcwd())], command=args.command).decode("utf-8"))
+        pass
+    elif args.action == 'push':
+        execute_shell_cmd("git add . && git commit -m \"{0}\" && git push".format(args.message),args.verbose)
+    else:
+        raise ValueError("Unknown action selected: {0}".format(args.action))
 
 if __name__ == "__main__":
     main()

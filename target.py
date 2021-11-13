@@ -61,12 +61,6 @@ class target:
     def purify(self, verbose=False):
         execute_shell_cmd("rm -r -f {0}".format(self.build_dir), verbose)
 
-    def show(self, verbose=False):
-        if not verbose:
-            print("- {0}".format(self.name))
-        else:
-            print(self)
-
     def zip(self, verbose=False):
         execute_shell_cmd("zip -r {0}/{1}.zip {2} {3}".format(self.build_dir,self.name,self.target_file_and_path,self.local_dep_target_list), verbose)
 
@@ -115,7 +109,7 @@ class executable(target):
 
     def __str__(self):
         padding = self.print_padding
-        repr =  self.name + " is defined as follows:\n" + \
+        repr =  "*"*40 + "\n" + self.name + " is defined as follows:\n" + \
                 "- name:".ljust(padding,'.') + self.name + "\n" + \
                 "- target:".ljust(padding,'.') + self.target + "\n" + \
                 "- build_dir:".ljust(padding,'.') + self.build_dir + "\n" + \
@@ -135,7 +129,7 @@ class executable(target):
                 "- library_dirs:".ljust(padding,'.') + convert_list_to_str_for_printing(self.library_dirs, padding) + "\n" + \
                 "- local_dependencies:".ljust(padding,'.') + convert_list_to_str_for_printing([dep.name for dep in self.local_dependencies], padding) + "\n" + \
                 "- pre_build_cmds:".ljust(padding,'.') + convert_list_to_str_for_printing(self.pre_build_cmds, padding) + "\n" + \
-                "- post_build_cmds:".ljust(padding,'.') + convert_list_to_str_for_printing(self.post_build_cmds, padding)
+                "- post_build_cmds:".ljust(padding,'.') + convert_list_to_str_for_printing(self.post_build_cmds, padding) + "\n" + "*"*40
         return repr
 
 class library(target):
@@ -172,7 +166,7 @@ class library(target):
 
     def __str__(self):
         padding = self.print_padding
-        repr =  self.name + " is defined as follows:\n" + \
+        repr =  "*"*40 + "\n" + self.name + " is defined as follows:\n" + \
                 "- name:".ljust(padding,'.') + self.name + "\n" + \
                 "- target:".ljust(padding,'.') + self.target + "\n" + \
                 "- build_dir:".ljust(padding,'.') + self.build_dir + "\n" + \
@@ -191,5 +185,5 @@ class library(target):
                 "- library_dirs:".ljust(padding,'.') + convert_list_to_str_for_printing(self.library_dirs, padding) + "\n" + \
                 "- local_dependencies:".ljust(padding,'.') + convert_list_to_str_for_printing([dep.name for dep in self.local_dependencies], padding) + "\n" + \
                 "- pre_build_cmds:".ljust(padding,'.') + convert_list_to_str_for_printing(self.pre_build_cmds, padding) + "\n" + \
-                "- post_build_cmds:".ljust(padding,'.') + convert_list_to_str_for_printing(self.post_build_cmds, padding)
+                "- post_build_cmds:".ljust(padding,'.') + convert_list_to_str_for_printing(self.post_build_cmds, padding) + "\n" + "*"*40
         return repr
