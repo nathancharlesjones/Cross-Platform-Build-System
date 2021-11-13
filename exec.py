@@ -25,21 +25,28 @@ def main():
     #parser.add_argument('-v', '--verbose', action='store_true', default=False, help='Verbose output. Show the recipe configuration prior to it being built and show all executing commands as they are being run. (Note: Errors are shown regardless of this setting.)')
 
     # New CLIs:
-    #  - Build Docker container
-    #  - Change container name?
-    #  - Generate build.ninja -g --generate
-    #  - Execute ninja command -n --ninja
-    #    - Wrap ("-n build") or pass ("-n ninja")?
-    #  - Run host executable
-    #  - Run tests
-    #  - Purify -p --purify
-    #  - Zip -z --zip
-    #  - List -l --list
-    #  - Start debug session -d --debug
-    #  - Git add/commit -gc --git-commit
-    #  - Git add/commit/push -gp --git-push
-    #  - Option to run commands plain or in docker? -dr --docker-run
-    #  - Verbose -v --verbose
+    #  1) Build Docker container -c --build-container
+    #     - Container name listed in exec.py as a variable (file?), allowed to be overridden on the command-line
+    #  2) Generate build.ninja -g --generate
+    #  3) Run docker command -r --docker-run
+    #     - Build all with "-r 'ninja'"
+    #     - Build a single target with "-r 'ninja -t TARGET'"
+    #     - Clean all with "-r 'ninja -t clean'"
+    #     - Run executable with "-r './path/to/executable'"
+    #  4) Flash binary to target -f --flash (REQUIRES TARGET)
+    #     - J-Link/OpenOCD settings stored in a file; can specify different input file or alternates on the command-line
+    #  5) List -l --list
+    #     - Can be combined with -v to get full target descriptions
+    #     - Target optional, all by default
+    #  6) Start debug session -d --debug (REQUIRES ARCH)
+    #     - Will start a gdbgui session corresponding to the arch specified and exposes the port
+    #     - Starts and connects to GDB server on debug adapter?
+    #     - Loads target file?
+    #     - Runs gdb init script?
+    #     - Other stuff I can do with pyGDB?
+    #  7) Git push -p --git-push
+    #     - Allow for overridding the UN/PW on command line
+    #  8) Verbose output -v --verbose
     args = parser.parse_args()
 
     client = docker.from_env()
