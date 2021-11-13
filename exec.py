@@ -26,9 +26,10 @@ def main():
     flash_binary.add_argument('-t', '--target', choices=list(targets), help="Target that is to be flashed to the attached MCU.")
 
     list_targets = subparsers.add_parser('list', help="List the available targets (specified in 'project_targets.py'). Use with '-v' to see all components of the specified target.")
-    list_targets.add_argument('-t', '--target', choices=list(targets), help="Target to be listed.")
+    list_targets.add_argument('-t', '--target', choices=list(targets), default=list(targets), help="Target to be listed.")
 
     start_debug_session = subparsers.add_parser('debug', help="List the available targets (specified in 'project_targets.py'). Use with '-v' to see all components of the specified target.")
+    start_debug_session.add_argument('-n', '--name', default=docker_name, help="Override the name in <> with a new name.")
 
     git_push = subparsers.add_parser('push', help="Execute 'git add . && git commit -m MESSAGE && git push'.")
     git_push.add_argument('-m', '--message', required=True, help="The commit message.")
@@ -70,18 +71,15 @@ def main():
         generate_build_dot_ninja_from_targets(targets)
     elif args.action == 'run':
         client = docker.from_env()
-        print(client.containers.run('devenv-simple-build-system', volumes=["{0}:/app".format(os.getcwd())], command=args.command).decode("utf-8"))
+        print(client.containers.run(args.name, volumes=["{0}:/app".format(os.getcwd())], command=args.command).decode("utf-8"))
     elif args.action == 'flash':
         pass
     elif args.action == 'list':
-        if args.target:
-            print(targets[args.target])
-        else:
-            for target in targets:
-                print(targets[target])
+        for target in args.target:
+            print(targets[target])
     elif args.action == 'debug':
-        #print(client.containers.run('devenv-simple-build-system', volumes=["{0}:/app".format(os.getcwd())], command=args.command).decode("utf-8"))
-        pass
+        client = docker.from_env()
+        print(client.containers.run(args.name, volumes=["{0}:/app".format(os.getcwd())], ports={"5000/tcp:5000"}, command="gdbgui -r --port 5000").decode("utf-8"))
     elif args.action == 'push':
         execute_shell_cmd("git add . && git commit -m \"{0}\" && git push".format(args.message),args.verbose)
     else:
