@@ -43,27 +43,6 @@ class target:
         self.post_build_cmds = post_build_cmds
         self.obj_files = []
     
-    def clean(self, verbose=False):
-        execute_shell_cmd("find {0}".format(self.build_dir)+r" -mindepth 1 -maxdepth 1 -type d -exec rm -r {} \;", verbose)
-    
-    def execute(self, cmd, verbose=False):
-        if cmd == 'clean':
-            self.clean(verbose)
-        elif cmd == 'purify':
-            self.purify(verbose)
-        elif cmd == 'zip':
-            self.zip(verbose)
-        elif cmd == 'list':
-            self.show(verbose)
-        elif cmd == 'build':
-            self.build(verbose)
-
-    def purify(self, verbose=False):
-        execute_shell_cmd("rm -r -f {0}".format(self.build_dir), verbose)
-
-    def zip(self, verbose=False):
-        execute_shell_cmd("zip -r {0}/{1}.zip {2} {3}".format(self.build_dir,self.name,self.target_file_and_path,self.local_dep_target_list), verbose)
-
     def __str__(self):
         pass
 

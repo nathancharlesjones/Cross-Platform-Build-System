@@ -35,7 +35,7 @@ RUN apt-get install -y python3-pip
 RUN pip3 install cmake
 
 # Get Ninja
-RUN RUN apt-get install -y ninja-build
+RUN apt-get install -y ninja-build
 RUN pip3 install ninja_syntax
 
 # Get other useful tools

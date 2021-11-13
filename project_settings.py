@@ -1,5 +1,8 @@
 import target
 
+docker_file = 'Dockerfile'
+docker_name = 'devenv-simple-build-system'
+
 targets = {}
 
 target_str 				= "{0}.elf"
