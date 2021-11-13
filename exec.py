@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 from helper import execute_shell_cmd
-from project_targets import targets
+from project_settings import targets, docker_name
 import argparse
 import subprocess
 import docker
@@ -13,13 +13,14 @@ def main():
     subparsers = parser.add_subparsers(dest='action', required=True)
     
     build_docker_container = subparsers.add_parser('build_docker', help="Builds the Docker container specified in a Dockerfile in the same folder as this script with the name specified.")
-    build_docker_container.add_argument('-n', '--name', help="Override the name in <> with a new name.")
+    build_docker_container.add_argument('-f', '--file', default="Dockerfile, help="Override the file in <>.")
+    build_docker_container.add_argument('-n', '--name', default=docker_name, help="Override the name in <> with a new name.")
 
     build_ninja_file = subparsers.add_parser('build_ninja', help="(Re)Build the file 'build.ninja' according to the project specifications defined in 'project_targets.py'.")
 
     run_docker_cmd = subparsers.add_parser('run', help="Run the specified command in Docker.")
     run_docker_cmd.add_argument('-c', '--command', required=True, help="The command to run.")
-    run_docker_cmd.add_argument('-n', '--name', help="Override the name in <> with a new name.")
+    run_docker_cmd.add_argument('-n', '--name', default=docker_name, help="Override the name in <> with a new name.")
 
     flash_binary = subparsers.add_parser('flash', help="Flash the specified binary to an attached MCU.")
     flash_binary.add_argument('-t', '--target', choices=list(targets), help="Target that is to be flashed to the attached MCU.")
@@ -62,7 +63,9 @@ def main():
     
     if args.action == 'build_docker':
         # Build docker file
-        pass
+        # docker build -f Dockerfile -t <NAME> .
+        client = docker.from_env()
+        client.images.build(fileobj=args.file, tag=args.name)
     elif args.action == 'build_ninja':
         generate_build_dot_ninja_from_targets(targets)
     elif args.action == 'run':
