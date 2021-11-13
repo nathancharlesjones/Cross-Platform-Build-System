@@ -27,16 +27,19 @@ def main():
     # New CLIs:
     #  - Build Docker container
     #  - Change container name?
-    #  - Generate build.ninja
-    #  - Execute ninja command
+    #  - Generate build.ninja -g --generate
+    #  - Execute ninja command -n --ninja
+    #    - Wrap ("-n build") or pass ("-n ninja")?
     #  - Run host executable
     #  - Run tests
-    #  - Purify
-    #  - Zip
-    #  - List
-    #  - Start debug session
-    #  - Git add/commit
-    #  - Git add/commit/push
+    #  - Purify -p --purify
+    #  - Zip -z --zip
+    #  - List -l --list
+    #  - Start debug session -d --debug
+    #  - Git add/commit -gc --git-commit
+    #  - Git add/commit/push -gp --git-push
+    #  - Option to run commands plain or in docker? -dr --docker-run
+    #  - Verbose -v --verbose
     args = parser.parse_args()
 
     client = docker.from_env()
