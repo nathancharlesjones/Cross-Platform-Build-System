@@ -2,6 +2,7 @@ import argparse
 import subprocess
 import os
 from functools import reduce
+import shlex
 
 def convert_list_to_str_for_printing(list, padding):
     return str(list).replace(", ",",\n" + " "*(padding + 1))
@@ -9,7 +10,9 @@ def convert_list_to_str_for_printing(list, padding):
 def execute_shell_cmd(cmd, verbose):
     if verbose:
         print("Executing: " + cmd)
-    process = subprocess.run([cmd], shell=True, text=True)
+    #print(shlex.split(cmd))
+    #process = subprocess.run(shlex.split(cmd), shell=True, text=True)
+    process = subprocess.run(cmd, shell=True, text=True)
     if verbose and process.stdout:
         print("Output: " + process.stdout)
 

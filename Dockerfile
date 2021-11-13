@@ -39,7 +39,9 @@ RUN apt-get install -y ninja-build
 RUN pip3 install ninja_syntax
 
 # Get other useful tools
-RUN apt-get install -y zip git-all docker
+RUN apt-get install -y zip
+RUN apt-get install -y git
+#RUN apt-get install -y docker
 
 # Get sample dependency (mpaland/printf)
 # User must copy this folder (and any others) to the correct location once a container is built and started

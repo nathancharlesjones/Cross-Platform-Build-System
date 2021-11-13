@@ -1,4 +1,4 @@
-from helper import (execute_shell_cmd, list_of_files_contains_c_files,
+from helper import (list_of_files_contains_c_files,
                     list_of_files_contains_cpp_files, list_of_files_contains_s_or_S_files,
                     convert_list_to_str_for_printing, get_file_extension)
 import os

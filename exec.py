@@ -4,7 +4,6 @@ from helper import execute_shell_cmd
 from project_settings import targets, docker_file, docker_name
 from ninja_generate import generate_build_dot_ninja_from_targets
 import argparse
-import docker
 import os
 
 # Update help strings
@@ -47,16 +46,14 @@ def main():
     args = parser.parse_args()
     
     if args.action == 'build_docker':
-        #client = docker.from_env()
-        #client.images.build(dockerfile=args.file, tag=args.name)
-        execute_shell_cmd('docker build .',args.verbose)
+        # Add options for new filepath, name
+        cmd = ['docker', 'build', '.']
+        execute_shell_cmd(cmd,args.verbose)
     elif args.action == 'build_ninja':
         generate_build_dot_ninja_from_targets(targets)
     elif args.action == 'run':
-        client = docker.from_env()
-        container = client.containers.run(image=args.name, volumes=["{0}:/app".format(os.getcwd())], command=args.command, detach=True, auto_remove=True)
-        for line in container.logs(stream=True):
-            print(line.strip().decode('utf-8'))
+        cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), args.name, '/bin/bash', '-c', args.command]
+        execute_shell_cmd(cmd, args.verbose)
     elif args.action == 'flash':
         # Not working
         pass
@@ -64,16 +61,17 @@ def main():
         for target in args.target:
             print(targets[target])
     elif args.action == 'debug':
-        # Not working
-        client = docker.from_env()
-        client.containers.run(image=args.name, volumes=["{0}:/app".format(os.getcwd())], ports={"5000/tcp:5000"}, command="gdbgui -r --port 5000").decode("utf-8")
+        cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), '-p 5000:5000', args.name, '/bin/bash', '-c', "gdbgui -r --port 5000"]
+        execute_shell_cmd(cmd, args.verbose)
     elif args.action == 'push':
         # Not working
         # Switch to GitPython (https://gitpython.readthedocs.io/en/stable/tutorial.html#tutorial-label)
-        execute_shell_cmd("git add .", args.verbose)
-        #execute_shell_cmd('''git commit -m "{0}"'''.format(args.message),args.verbose)
-        #execute_shell_cmd("git push".format(args.message),args.verbose)
-        #execute_shell_cmd("git add . && git commit -m \"{0}\" && git push".format(args.message),args.verbose)
+        cmd = ['git', 'add', '.']
+        execute_shell_cmd(cmd, args.verbose)
+        cmd = ['git', 'commit', '-m', args.message]
+        execute_shell_cmd(cmd, args.verbose)
+        cmd = ['git', 'push']
+        execute_shell_cmd(cmd, args.verbose)
     else:
         raise ValueError("Unknown action selected: {0}".format(args.action))
 
