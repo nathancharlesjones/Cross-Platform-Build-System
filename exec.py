@@ -64,8 +64,6 @@ def main():
         cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), '-p 5000:5000', args.name, '/bin/bash', '-c', "gdbgui -r --port 5000"]
         execute_shell_cmd(cmd, args.verbose)
     elif args.action == 'push':
-        # Not working
-        # Switch to GitPython (https://gitpython.readthedocs.io/en/stable/tutorial.html#tutorial-label)
         cmd = ['git', 'add', '.']
         execute_shell_cmd(cmd, args.verbose)
         cmd = ['git', 'commit', '-m', args.message]
