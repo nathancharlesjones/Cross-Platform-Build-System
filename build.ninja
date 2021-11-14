@@ -7,6 +7,22 @@ rule link
       $library_dirs $libraries -o $out
 rule archive
   command = $archiver $flags $defines $out $in
+rule rebuild
+  command = ./exec.py build_ninja
+rule blinky_x86_debug_post_build_cmd
+  command = echo Finished building blinky_x86_debug
+rule blinky_x86_release_post_build_cmd
+  command = echo Finished building blinky_x86_release
+rule blinky_STM32F1_debug_post_build_cmd
+  command = arm-none-eabi-size build/STM32F1/debug/blinky_STM32F1_debug.elf $
+      && arm-none-eabi-objcopy -O binary -S $
+      build/STM32F1/debug/blinky_STM32F1_debug.elf $
+      build/STM32F1/debug/blinky_STM32F1_debug.bin
+build build.ninja: rebuild $
+    /mnt/c/Users/nathan.jones2/Documents/GitHub/Python-Build-System-with-Ninja/exec.py $
+    /mnt/c/Users/nathan.jones2/Documents/GitHub/Python-Build-System-with-Ninja/target.py $
+    /mnt/c/Users/nathan.jones2/Documents/GitHub/Python-Build-System-with-Ninja/ninja_generate.py $
+    /mnt/c/Users/nathan.jones2/Documents/GitHub/Python-Build-System-with-Ninja/project_settings.py
 build build/x86/debug/source/main.o: compile source/main.c
   compiler = gcc
   flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0
@@ -46,6 +62,9 @@ build build/x86/debug/blinky_x86_debug.elf: link $
       libraries/STM32CubeF1/CMSIS/Include
   library_dirs = 
   libraries = -lm
+build blinky_x86_debug_post_build_cmd: blinky_x86_debug_post_build_cmd | $
+    build/x86/debug/blinky_x86_debug.elf
+build blinky_x86_debug: phony | blinky_x86_debug_post_build_cmd
 build build/x86/release/source/main.o: compile source/main.c
   compiler = gcc
   flags = -std=c11 -Wall -ffunction-sections -fdata-sections -O3
@@ -86,6 +105,9 @@ build build/x86/release/blinky_x86_release.elf: link $
       libraries/STM32CubeF1/CMSIS/Include
   library_dirs = 
   libraries = -lm
+build blinky_x86_release_post_build_cmd: blinky_x86_release_post_build_cmd $
+    | build/x86/release/blinky_x86_release.elf
+build blinky_x86_release: phony | blinky_x86_release_post_build_cmd
 build build/STM32F1/debug/source/main.o: compile source/main.c
   compiler = arm-none-eabi-gcc
   flags = -std=c11 -Wall -ffunction-sections -fdata-sections -g3 -O0 $
@@ -392,3 +414,7 @@ build build/STM32F1/debug/blinky_STM32F1_debug.elf: link $
       libraries/STM32CubeF1/CMSIS/Include
   library_dirs = 
   libraries = -lm -lc -lnosys
+build blinky_STM32F1_debug_post_build_cmd: $
+    blinky_STM32F1_debug_post_build_cmd | $
+    build/STM32F1/debug/blinky_STM32F1_debug.elf
+build blinky_STM32F1_debug: phony | blinky_STM32F1_debug_post_build_cmd

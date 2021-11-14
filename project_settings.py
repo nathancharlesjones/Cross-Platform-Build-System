@@ -49,7 +49,8 @@ x86_debug = target.executable(
 	source_files 		= 	x86_source_files,
 	include_dirs 		= 	include_dirs,
 	libraries 			= 	libraries_common,
-	debugger 			=	x86_debugger
+	debugger 			=	x86_debugger,
+	post_build_cmds 	= ["echo Finished building {0}".format(x86_debug_name)]
 )
 
 targets[x86_debug.name] = x86_debug
@@ -68,7 +69,8 @@ x86_release = target.executable(
 	source_files 		= 	x86_source_files,
 	include_dirs 		= 	include_dirs,
 	libraries 			= 	libraries_common,
-	debugger 			=	x86_debugger
+	debugger 			=	x86_debugger,
+	post_build_cmds 	= ["echo Finished building {0}".format(x86_release_name)]
 )
 
 targets[x86_release.name] = x86_release
@@ -117,8 +119,8 @@ STM32F1_debug = target.executable(
 	libraries 			= 	libraries_common + \
 							["c", "nosys"],
 	debugger 			=	STM32f1_debugger,
-	#post_build_cmds 	= 	["arm-none-eabi-size {0}/{1}".format(STM32F1_debug_build_dir, target_str.format(STM32F1_debug_name)),
-#							 "arm-none-eabi-objcopy -O binary -S {0}/{1} {0}/{2}.bin".format(STM32F1_debug_build_dir, target_str.format(STM32F1_debug_name), STM32F1_debug_name)]
+	post_build_cmds 	= 	["arm-none-eabi-size {0}/{1}".format(STM32F1_debug_build_dir, target_str.format(STM32F1_debug_name)),
+							 "arm-none-eabi-objcopy -O binary -S {0}/{1} {0}/{2}.bin".format(STM32F1_debug_build_dir, target_str.format(STM32F1_debug_name), STM32F1_debug_name)]
 )
 
 targets[STM32F1_debug.name] = STM32F1_debug

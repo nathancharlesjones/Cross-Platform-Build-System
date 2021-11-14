@@ -11,9 +11,11 @@ rule test
 
 build post_cmd_exe: post_cmd_exe | exe_file
 
-build pre_cmd_exe: pre_cmd_exe
+#build pre_cmd_exe: pre_cmd_exe
 
-build exe_file: test exe_file_inputs | pre_cmd_exe
+#build exe_file: test exe_file_inputs | pre_cmd_exe
+
+build exe_file: test exe_file_inputs
 
 build exe: phony | post_cmd_exe
 

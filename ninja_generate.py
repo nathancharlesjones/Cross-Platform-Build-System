@@ -1,9 +1,9 @@
 import ninja_syntax
-from helper import get_file_extension
+from helper import get_file_extension, execute_shell_cmd
+import os
+from functools import reduce
 
-# How to do pre-/post-commands?
-# Add self-rebuilding rule?
-# Add renaming step?      
+python_dependencies_for_build_dot_ninja = ['exec.py', 'target.py', 'ninja_generate.py', 'project_settings.py']     
 
 def generate_build_dot_ninja_from_targets(targets, path_to_exec):
     with open('build.ninja', 'w') as build_file:
@@ -30,10 +30,17 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
             command='{0} build_ninja'.format(path_to_exec)
         )
 
-        ninja.build(
+        for target in targets:
+            ninja_file.rule(
+                name=targets[target].name+"_post_build_cmd",
+                command=reduce(lambda a, b: a + " && " + b, targets[target].post_build_cmds) if len(targets[target].post_build_cmds)>0 else ''
+            )
+
+        python_scripts_dir = os.path.dirname(__file__).replace('\\','/')
+        ninja_file.build(
             outputs='build.ninja',
             rule="rebuild",
-            inputs=[]
+            inputs=[python_scripts_dir+"/"+file for file in python_dependencies_for_build_dot_ninja]
         )
 
         for target in targets:
@@ -68,3 +75,15 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
                 )
 
             targets[target].add_final_build_edge(ninja_file)
+
+            ninja_file.build(
+                outputs=targets[target].name+"_post_build_cmd",
+                rule=targets[target].name+"_post_build_cmd",
+                implicit=targets[target].target_file_and_path,
+            )
+
+            ninja_file.build(
+                outputs=targets[target].name,
+                rule='phony',
+                implicit=targets[target].name+"_post_build_cmd"
+            )

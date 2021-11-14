@@ -12,7 +12,7 @@ class target:
     def __init__(self,build_dir,target,source_files,name='unnamed target',
         assembler='',as_flags=[],c_compiler='',c_flags=[],cpp_compiler='',cpp_flags=[],
         defines=[],include_dirs=[],libraries=[],library_dirs=[],
-        local_dependencies=[],pre_build_cmds=[],post_build_cmds=[]):
+        local_dependencies=[],post_build_cmds=[]):
         #raise NameError("Class target does not support creating objects; use target.executable or target.library instead.")
         self.name = name
         self.source_files = source_files
@@ -39,7 +39,6 @@ class target:
         self.library_dirs = library_dirs
         self.local_dependencies = local_dependencies
         self.local_dep_target_list = ["{0}/{1}".format(dep.build_dir,dep.target) for dep in self.local_dependencies]
-        self.pre_build_cmds = pre_build_cmds
         self.post_build_cmds = post_build_cmds
         self.obj_files = []
     
@@ -52,14 +51,14 @@ class executable(target):
     def __init__(self,linker,build_dir,target,source_files,name='unnamed target',
         assembler='',as_flags=[],c_compiler='',c_flags=[],cpp_compiler='',cpp_flags=[],
         defines=[],linker_flags=[],include_dirs=[],libraries=[],library_dirs=[],
-        linker_script='',local_dependencies=[],pre_build_cmds=[],post_build_cmds=[],
+        linker_script='',local_dependencies=[],post_build_cmds=[],
         debugger=''):
         """ Helpful docstring """
 
         super().__init__(build_dir,target,source_files,name,
         assembler,as_flags,c_compiler,c_flags,cpp_compiler,cpp_flags,
         defines,include_dirs,libraries,library_dirs,
-        local_dependencies,pre_build_cmds,post_build_cmds)
+        local_dependencies,post_build_cmds)
 
         self.linker = linker
         self.linker_flags = linker_flags
@@ -121,13 +120,13 @@ class library(target):
     def __init__(self,archiver,build_dir,target,source_files,name='unnamed target',
         assembler='',as_flags=[],c_compiler='',c_flags=[],cpp_compiler='',cpp_flags=[],
         defines=[],archiver_flags=[],include_dirs=[],libraries=[],
-        library_dirs=[],local_dependencies=[],pre_build_cmds=[],post_build_cmds=[]):
+        library_dirs=[],local_dependencies=[],post_build_cmds=[]):
         """ Helpful docstring """
 
         super().__init__(build_dir,target,source_files,name,
         assembler,as_flags,c_compiler,c_flags,cpp_compiler,cpp_flags,
         defines,include_dirs,libraries,library_dirs,
-        local_dependencies,pre_build_cmds,post_build_cmds)
+        local_dependencies,post_build_cmds)
 
         self.archiver = archiver
         self.archiver_flags = archiver_flags
