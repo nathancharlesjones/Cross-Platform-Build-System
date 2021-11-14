@@ -1,7 +1,8 @@
 import target
 
-docker_file = 'Dockerfile'
-docker_name = 'devenv-simple-build-system'
+default_path_to_docker_file = '.'
+default_docker_name = 'devenv-simple-build-system'
+default_debug_port_number = '5000'
 
 targets = {}
 
@@ -26,15 +27,16 @@ linker_flags_common		= ["-Wl,--gc-sections"]
 libraries_common 		= ["m"]
 map_file_str			= "-Wl,-Map,{0}/{1}.map,--cref"
 
-x86_name = "blinky_x86"
-x86_build_dir = "build/x86"
-x86_source_files =  source_files_common + \
-				   ["hardware/source/x86/x86.c"]
-x86_c_compiler = "gcc"
-x86_linker = "gcc"
+x86_name 				= "blinky_x86"
+x86_build_dir 			= "build/x86"
+x86_source_files 		=  source_files_common + \
+						  ["hardware/source/x86/x86.c"]
+x86_c_compiler 			= "gcc"
+x86_linker 				= "gcc"
+x86_debugger 			= "gdb"
 
-x86_debug_name = x86_name + "_debug"
-x86_debug_build_dir = x86_build_dir + "/debug"
+x86_debug_name 			= x86_name + "_debug"
+x86_debug_build_dir 	= x86_build_dir + "/debug"
 x86_debug = target.executable(
 	name 				= 	x86_debug_name,
 	build_dir 			= 	x86_debug_build_dir,
@@ -46,13 +48,14 @@ x86_debug = target.executable(
 							[map_file_str.format(x86_debug_build_dir, x86_debug_name)],
 	source_files 		= 	x86_source_files,
 	include_dirs 		= 	include_dirs,
-	libraries 			= 	libraries_common
+	libraries 			= 	libraries_common,
+	debugger 			=	x86_debugger
 )
 
 targets[x86_debug.name] = x86_debug
 
-x86_release_name = x86_name + "_release"
-x86_release_build_dir = x86_build_dir + "/release"
+x86_release_name 		= x86_name + "_release"
+x86_release_build_dir 	= x86_build_dir + "/release"
 x86_release = target.executable(
 	name 				= 	x86_release_name,
 	build_dir 			= 	x86_release_build_dir,
@@ -64,15 +67,17 @@ x86_release = target.executable(
 							[map_file_str.format(x86_release_build_dir, x86_release_name)],
 	source_files 		= 	x86_source_files,
 	include_dirs 		= 	include_dirs,
-	libraries 			= 	libraries_common
+	libraries 			= 	libraries_common,
+	debugger 			=	x86_debugger
 )
 
 targets[x86_release.name] = x86_release
 
-STM32F1_debug_name = "blinky_STM32F1_debug"
+STM32F1_debug_name 		= "blinky_STM32F1_debug"
 STM32F1_debug_build_dir = "build/STM32F1/debug"
-mcu_flags = ["-mcpu=cortex-m3",
-			 "-mthumb"]
+mcu_flags 				= ["-mcpu=cortex-m3",
+						   "-mthumb"]
+STM32f1_debugger 		=	"arm-none-eabi-gdb"
 STM32F1_debug = target.executable(
 	name 				= 	STM32F1_debug_name,
 	build_dir 			= 	STM32F1_debug_build_dir,
@@ -111,6 +116,7 @@ STM32F1_debug = target.executable(
 	include_dirs 		= 	include_dirs,
 	libraries 			= 	libraries_common + \
 							["c", "nosys"],
+	debugger 			=	STM32f1_debugger,
 	#post_build_cmds 	= 	["arm-none-eabi-size {0}/{1}".format(STM32F1_debug_build_dir, target_str.format(STM32F1_debug_name)),
 #							 "arm-none-eabi-objcopy -O binary -S {0}/{1} {0}/{2}.bin".format(STM32F1_debug_build_dir, target_str.format(STM32F1_debug_name), STM32F1_debug_name)]
 )

@@ -52,7 +52,8 @@ class executable(target):
     def __init__(self,linker,build_dir,target,source_files,name='unnamed target',
         assembler='',as_flags=[],c_compiler='',c_flags=[],cpp_compiler='',cpp_flags=[],
         defines=[],linker_flags=[],include_dirs=[],libraries=[],library_dirs=[],
-        linker_script='',local_dependencies=[],pre_build_cmds=[],post_build_cmds=[]):
+        linker_script='',local_dependencies=[],pre_build_cmds=[],post_build_cmds=[],
+        debugger=''):
         """ Helpful docstring """
 
         super().__init__(build_dir,target,source_files,name,
@@ -63,6 +64,7 @@ class executable(target):
         self.linker = linker
         self.linker_flags = linker_flags
         self.linker_script = linker_script
+        self.debugger = debugger
 
     def add_final_build_edge(self, ninja_file):
         define_str = ' '.join(["-D"+define for define in self.defines])
@@ -73,6 +75,7 @@ class executable(target):
             outputs=self.target_file_and_path, 
             rule="link", 
             inputs=self.obj_files, 
+            # Should this include other libraries?
             implicit=[lib.target_file_and_path for lib in self.local_dependencies],
             variables=
             {
@@ -107,6 +110,7 @@ class executable(target):
                 "- libraries:".ljust(padding,'.') + convert_list_to_str_for_printing(self.libraries, padding) + "\n" + \
                 "- library_dirs:".ljust(padding,'.') + convert_list_to_str_for_printing(self.library_dirs, padding) + "\n" + \
                 "- local_dependencies:".ljust(padding,'.') + convert_list_to_str_for_printing([dep.name for dep in self.local_dependencies], padding) + "\n" + \
+                "- debugger:".ljust(padding,'.') + self.debugger + "\n" + \
                 "- pre_build_cmds:".ljust(padding,'.') + convert_list_to_str_for_printing(self.pre_build_cmds, padding) + "\n" + \
                 "- post_build_cmds:".ljust(padding,'.') + convert_list_to_str_for_printing(self.post_build_cmds, padding) + "\n" + "*"*40
         return repr
@@ -134,6 +138,7 @@ class library(target):
             outputs=self.target_file_and_path, 
             rule="archive", 
             inputs=self.obj_files, 
+            # Should this include other libraries?
             implicit=[lib.target_file_and_path for lib in self.local_dependencies],
             variables=
             {

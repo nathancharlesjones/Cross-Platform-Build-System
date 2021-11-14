@@ -29,6 +29,7 @@ RUN pip3 install gdbgui
 RUN apt-get install -y wget
 RUN cd /opt && wget -qO- https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 | tar -xj
 ENV PATH "/opt/gcc-arm-none-eabi-10.3-2021.10/bin:$PATH"
+RUN apt-get install -y libncurses5  # Required for arm-none-eabi-gdb
 
 # Get CMake
 RUN apt-get install -y python3-pip

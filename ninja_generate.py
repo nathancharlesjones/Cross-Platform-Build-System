@@ -5,7 +5,7 @@ from helper import get_file_extension
 # Add self-rebuilding rule?
 # Add renaming step?      
 
-def generate_build_dot_ninja_from_targets(targets):
+def generate_build_dot_ninja_from_targets(targets, path_to_exec):
     with open('build.ninja', 'w') as build_file:
         ninja_file = ninja_syntax.Writer(build_file)
         
@@ -23,6 +23,17 @@ def generate_build_dot_ninja_from_targets(targets):
         ninja_file.rule(
             name="archive", 
             command="$archiver $flags $defines $out $in"
+        )
+
+        ninja_file.rule(
+            name="rebuild",
+            command='{0} build_ninja'.format(path_to_exec)
+        )
+
+        ninja.build(
+            outputs='build.ninja',
+            rule="rebuild",
+            inputs=[]
         )
 
         for target in targets:
