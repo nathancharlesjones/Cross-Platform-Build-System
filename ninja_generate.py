@@ -5,7 +5,7 @@ from functools import reduce
 
 python_dependencies_for_build_dot_ninja = ['exec.py', 'target.py', 'ninja_generate.py', 'project_settings.py']     
 
-def generate_build_dot_ninja_from_targets(targets, path_to_exec):
+def generate_build_dot_ninja_from_targets(targets):
     with open('build.ninja', 'w') as build_file:
         ninja_file = ninja_syntax.Writer(build_file)
         

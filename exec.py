@@ -6,11 +6,8 @@ from helper import execute_shell_cmd
 from ninja_generate import generate_build_dot_ninja_from_targets
 import argparse
 import os
-import sys
 
 def main():
-    #print(execute_shell_cmd(['ls', ]))
-
     args = get_command_line_args()
     if args.verbose:
         print(args)
@@ -19,7 +16,7 @@ def main():
         cmd = ['docker', 'build', '-t', args.name, args.path]
         execute_shell_cmd(cmd,args.verbose)
     elif args.action == 'build_ninja':
-        generate_build_dot_ninja_from_targets(targets, sys.argv[0])
+        generate_build_dot_ninja_from_targets(targets)
     elif args.action == 'run':
         cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
                 args.name, '/bin/bash', '-c', args.command]
