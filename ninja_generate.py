@@ -27,7 +27,8 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
 
         ninja_file.rule(
             name="rebuild",
-            command='{0} build_ninja'.format(path_to_exec)
+            command='{0} build_ninja'.format(path_to_exec),
+            variables={'generator':'1'}
         )
 
         for target in targets:
