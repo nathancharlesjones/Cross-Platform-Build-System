@@ -80,7 +80,7 @@ class executable(target):
             {
                 'linker':self.linker,
                 'linker_flags':' '.join(self.linker_flags),
-                'linker_script':"-T " + self.linker_script,
+                'linker_script':"-T " + self.linker_script if self.linker_script else '',
                 'defines':define_str,
                 'include_dirs':include_dirs_str,
                 'library_dirs':library_dirs_str,
