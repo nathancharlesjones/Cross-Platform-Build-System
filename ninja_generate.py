@@ -35,10 +35,11 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
         )
 
         for target in targets:
-            ninja_file.rule(
-                name=targets[target].name+"_post_build_cmd",
-                command=reduce(lambda a, b: a + " && " + b, targets[target].post_build_cmds) if len(targets[target].post_build_cmds)>0 else ''
-            )
+            if len(targets[target].post_build_cmds) > 0:
+                ninja_file.rule(
+                    name=targets[target].name+"_post_build_cmd",
+                    command=reduce(lambda a, b: a + " && " + b, targets[target].post_build_cmds) if len(targets[target].post_build_cmds)>0 else ''
+                )
 
         ninja_file.build(
             outputs='build.ninja',
@@ -79,14 +80,15 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
 
             targets[target].add_final_build_edge(ninja_file)
 
-            ninja_file.build(
-                outputs=targets[target].name+"_post_build_cmd",
-                rule=targets[target].name+"_post_build_cmd",
-                implicit=targets[target].target_file_and_path,
-            )
+            if len(targets[target].post_build_cmds) > 0:
+                ninja_file.build(
+                    outputs=targets[target].name+"_post_build_cmd",
+                    rule=targets[target].name+"_post_build_cmd",
+                    implicit=targets[target].target_file_and_path,
+                )
 
-            ninja_file.build(
-                outputs=targets[target].name,
-                rule='phony',
-                implicit=targets[target].name+"_post_build_cmd"
-            )
+                ninja_file.build(
+                    outputs=targets[target].name,
+                    rule='phony',
+                    implicit=targets[target].name+"_post_build_cmd"
+                )
