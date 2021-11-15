@@ -3,9 +3,12 @@ from helper import get_file_extension, execute_shell_cmd
 import os
 from functools import reduce
 
-python_dependencies_for_build_dot_ninja = ['exec.py', 'target.py', 'ninja_generate.py', 'project_settings.py']     
+python_dependencies_for_build_dot_ninja = ['exec.py', 'target.py', 'ninja_generate.py', 'project_settings.py', 'helper.py']     
 
 def generate_build_dot_ninja_from_targets(targets, path_to_exec):
+    path_to_exec = (path_to_exec).replace('\\','/')
+    python_scripts_dir = os.path.dirname(path_to_exec)
+
     with open('build.ninja', 'w') as build_file:
         ninja_file = ninja_syntax.Writer(build_file)
         
@@ -28,7 +31,7 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
         ninja_file.rule(
             name="rebuild",
             command='{0} build_ninja'.format(path_to_exec),
-            variables={'generator':'1'}
+            generator=1
         )
 
         for target in targets:
@@ -37,7 +40,6 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
                 command=reduce(lambda a, b: a + " && " + b, targets[target].post_build_cmds) if len(targets[target].post_build_cmds)>0 else ''
             )
 
-        python_scripts_dir = os.path.dirname(__file__).replace('\\','/')
         ninja_file.build(
             outputs='build.ninja',
             rule="rebuild",
