@@ -7,33 +7,52 @@ from ninja_generate import generate_build_dot_ninja_from_targets
 import argparse
 import os
 import sys
+from pyocd.core.helpers import ConnectHelper
+from pyocd.flash.file_programmer import FileProgrammer
 
 def main():
     args = get_command_line_args()
     if args.verbose:
         print(args)
+
+    # TODO: Test that all of the Docker stuff works on Linux, too
     
     if args.action == 'build_docker':
         cmd = ['docker', 'build', '-t', args.name, args.path]
         execute_shell_cmd(cmd,args.verbose)
+    
     elif args.action == 'build_ninja':
         generate_build_dot_ninja_from_targets(targets, sys.argv[0])
+    
     elif args.action == 'run':
         cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
                 args.name, '/bin/bash', '-c', args.command]
         execute_shell_cmd(cmd, args.verbose)
+    
     elif args.action == 'flash':
-        # Not working
-        pass
+        # From https://pyocd.io/docs/api_examples.html
+        with ConnectHelper.session_with_chosen_probe() as session:
+            board = session.board
+            target = board.target
+            flash = target.memory_map.get_boot_memory()
+
+            # Load firmware into device.
+            FileProgrammer(session).program(args.target)
+
+            # Reset and run.
+            target.reset()
+
     elif args.action == 'list':
         for target in args.target:
             print(targets[target])
+
     elif args.action == 'debug':
         cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
-                '-p', '{0}:{0}'.format(default_debug_port_number), args.name, '/bin/bash', \
+                '-p', '{0}:{0}'.format(default_debug_port_number), "--network='host'", args.name, '/bin/bash', \
                 '-c', "gdbgui -g {0} -r --port {1} --args {2}".format(targets[args.target].debugger, \
                 default_debug_port_number, targets[args.target].target_file_and_path)]
         execute_shell_cmd(cmd, args.verbose)
+    
     elif args.action == 'push':
         cmd = ['git', 'add', '.']
         execute_shell_cmd(cmd, args.verbose)
@@ -41,11 +60,12 @@ def main():
         execute_shell_cmd(cmd, args.verbose)
         cmd = ['git', 'push']
         execute_shell_cmd(cmd, args.verbose)
+    
     else:
         raise ValueError("Unknown action selected: {0}".format(args.action))
 
 def get_command_line_args():
-    # Update help strings
+    # TODO: Update help strings
     parser = argparse.ArgumentParser(description="Helper script for interacting with an embedded systems project.")
     parser.add_argument('-v', '--verbose', action='store_true', default=False, help='Verbose output. Show the recipe configuration prior to it being built and show all executing commands as they are being run. (Note: Errors are shown regardless of this setting.)')
     subparsers = parser.add_subparsers(dest='action', required=True)
@@ -62,6 +82,7 @@ def get_command_line_args():
 
     flash_binary = subparsers.add_parser('flash', help="Flash the specified binary to an attached MCU.")
     flash_binary.add_argument('-t', '--target', choices=list(targets), required=True, help="Target that is to be flashed to the attached MCU.")
+    #flash_binary.add_argument('-m', '--mcu', default=default_mcu, help="MCU to be flashed. Default is {0}".format(default_mcu))
 
     list_targets = subparsers.add_parser('list', help="List the available targets (specified in 'project_targets.py'). Use with '-v' to see all components of the specified target.")
     list_targets.add_argument('-t', '--target', nargs=1, choices=list(targets), default=list(targets), help="Target to be listed.")

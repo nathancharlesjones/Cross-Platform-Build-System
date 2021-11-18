@@ -2,6 +2,7 @@ import target
 
 default_path_to_docker_file = '.'
 default_docker_name = 'devenv-simple-build-system'
+#default_mcu = 'STM32F411RE'
 default_debug_port_number = '5000'
 
 targets = {}
