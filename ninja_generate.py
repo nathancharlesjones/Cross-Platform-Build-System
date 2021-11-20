@@ -68,10 +68,21 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
                 else:
                     raise ValueError("Unrecognized file extension in source files: {0}".format(get_file_extension(source_file)))
                 
+                # Form the string for defines by prefixing each item in targets[target].defines with "-D"
                 define_str = ' '.join(["-D"+define for define in targets[target].defines])
+
+                # Form the string for include dirs by prefixing each item in targets[target].include_dirs with "-I "
                 include_dirs_str = ' '.join(["-I "+inc_dir for inc_dir in targets[target].include_dirs])
+
+                # Form the path for the object file by replacing the source file extension with ".o" (e.g.
+                # "src/sub1/main.c" becomes "src/sub1/main.o") and prefixing the result with the path to the 
+                # build dir (e.g. "src/sub1/main.o" becomes "build/src/sub1/main.o").
                 obj_file = "{0}/{1}".format(targets[target].build_dir,source_file.replace(get_file_extension(source_file), ".o"))
+                
+                # Append item to list of object files (used later by add_final_build_edge)
                 targets[target].obj_files.append(obj_file)
+                
+                # Add the build edge for this specific object file
                 ninja_file.build(
                     outputs=obj_file, 
                     rule="compile", 
@@ -93,32 +104,68 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
             #  - If no post-build commands are defined, rename the target to match the format of the
             #    targets with post-build commands ("target name", no extension)
 
-            # For targets with post-build commands:
-            # rule name_post_build_cmd
-            #     command=...
-            # build name.elf: ...
-            # build name_post_build_cmd: name_post_build_cmd | name.elf
-            # build name: phony | name_post_build_cmd
+            # For targets with post-build commands, we have to create some indirection.
+            # 1) The final target will be "name", and it will have an implicit dependency 
+            #    on "name_post_build_cmd" so that "name_post_build_cmd" will be run any
+            #    time "name" is built. I.e.
+            #        build name: phony | name_post_build_cmd
 
-            # For targets withOUT post-build commands:
-            # build name.elf: ...
-            # build name: phony | name.elf
+            # 2) The build edge for "name_post_build_cmd" will run "name_post_build_cmd"
+            #    AND it will have an implicit dependency on "name.ext", so that "name.ext"
+            #    is always brought up-to-date prior to running "name_post_build_cmd". I.e.
+            #        rule name_post_build_cmd
+            #            command=...
+            #        build name_post_build_cmd: name_post_build_cmd | name.elf
+
+            # 3) The actual target, "name.ext", is built like normal, per the format for either
+            #    an executable or library. I.e.
+            #        build name.ext: ...
+
+            # For targets withOUT post-build commands, we'll still need some indirection, but it's
+            # for the purpose of having all targets match the format shown above, with the final
+            # target being "name" instead of "name.elf"
+            # 1) To do that, we'll create a final target called "name", in order to match the format
+            #    of the targets above that DO have post-build commands, that has an implicit 
+            #    dependency on "name.ext". I.e.
+            #        build name: phony | name.ext
+
+            # 2) The actual target, "name.ext", is built like normal, per the format for either
+            #    an executable or library. I.e.
+            #        build name.ext: ...
+            
+            # So both targets will get an additional build edge to "rename" them to "name", but targets
+            # WITH post-build commands will have the implicit dependency be "name_post_build_cmds"
+            # while targets withOUT post-build commnds will have the implicit dependency be "name.ext".
+
+            # So the pattern is...
+            # if the target DOES have post-build commands...
             if len(targets[target].post_build_cmds) > 0:
+
+                # ...Add the rule "name_post_build_cmds"
                 ninja_file.rule(
                     name=targets[target].name+"_post_build_cmd",
                     command=reduce(lambda a, b: a + " && " + b, targets[target].post_build_cmds) if len(targets[target].post_build_cmds)>0 else ''
                 )
                 
+                # ...And the build edge that runs "name_post_build_cmd" with an implicit
+                # dependency on "name.ext"
                 ninja_file.build(
                     outputs=targets[target].name+"_post_build_cmd",
                     rule=targets[target].name+"_post_build_cmd",
                     implicit=targets[target].target_file_and_path,
                 )
 
+                # ...And set the implicit dependency for the final target to "name_post_build_cmds"
                 implicit = targets[target].name+"_post_build_cmd"
+
+            # ...but if the target does NOT have any post-build commands...
             else:
+
+                # ...Just set the implicit dependency for the final target to "name.ext"
                 implicit = targets[target].target_file_and_path
 
+            # Lastly, add the build edge for the final target of "name", with the implicit dependency
+            # that was set above.
             ninja_file.build(
                 outputs=targets[target].name,
                 rule='phony',
