@@ -66,7 +66,6 @@ def main():
         raise ValueError("Unknown action selected: {0}".format(args.action))
 
 def get_command_line_args():
-    # TODO: Update help strings
     parser = argparse.ArgumentParser(description="Helper script for interacting with an embedded systems project. Run 'exec.py ACTION -h' for further help information about each action that can be run.")
     parser.add_argument('-v', '--verbose', action='store_true', default=False, help='Verbose output. (Note: Errors are shown regardless of this setting.)')
     subparsers = parser.add_subparsers(dest='action', required=True)
