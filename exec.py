@@ -37,10 +37,10 @@ def main():
             flash = target.memory_map.get_boot_memory()
 
             # Load firmware into device.
-            FileProgrammer(session).program(args.target)
+            FileProgrammer(session).program(targets[args.target].target_file_and_path)
 
             # Reset and run.
-            target.reset()
+            # target.reset()
 
     elif args.action == 'list':
         for target in args.target:
