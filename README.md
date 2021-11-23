@@ -1,3 +1,11 @@
+# Python Build System with Ninja/Docker
+
+## What is it?
+
+## How do I use it?
+
+## References
+
 - https://github.com/wntrblm/Castor_and_Pollux/blob/main/firmware/configure.py
 - https://github.com/wntrblm/wintertools/blob/main/wintertools/buildgen.py
 - https://github.com/ninja-build/ninja/blob/84986/misc/ninja_syntax.py

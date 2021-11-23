@@ -1,6 +1,6 @@
 __pycache__
 .gitattributes
+.gitignore
 .ninja_deps
 .ninja_log
 build.ninja
-project_settings.py
