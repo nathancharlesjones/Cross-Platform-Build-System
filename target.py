@@ -74,7 +74,6 @@ class executable(target):
             outputs=self.target_file_and_path, 
             rule="link", 
             inputs=self.obj_files, 
-            # Should this include other libraries?
             implicit=[lib.target_file_and_path for lib in self.local_dependencies],
             variables=
             {
@@ -137,7 +136,6 @@ class library(target):
             outputs=self.target_file_and_path, 
             rule="archive", 
             inputs=self.obj_files, 
-            # Should this include other libraries?
             implicit=[lib.target_file_and_path for lib in self.local_dependencies],
             variables=
             {

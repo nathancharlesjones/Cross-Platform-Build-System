@@ -144,7 +144,7 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
                 # ...Add the rule "name_post_build_cmds"
                 ninja_file.rule(
                     name=targets[target].name+"_post_build_cmd",
-                    command=reduce(lambda a, b: a + " && " + b, targets[target].post_build_cmds) if len(targets[target].post_build_cmds)>0 else ''
+                    command=reduce(lambda a, b: a + " && " + b, targets[target].post_build_cmds)
                 )
                 
                 # ...And the build edge that runs "name_post_build_cmd" with an implicit
@@ -171,3 +171,9 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
                 rule='phony',
                 implicit=implicit
             )
+
+if __name__ == "__main__":
+    from project_settings import targets
+    import sys
+
+    generate_build_dot_ninja_from_targets(targets, sys.argv[0])

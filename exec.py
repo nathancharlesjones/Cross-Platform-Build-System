@@ -16,10 +16,12 @@ def main():
         print(args)
 
     # TODO: Test that all of the Docker stuff works on Linux, too
+    # TODO: Add "ninja" action? "clean" action?
+    # TODO: Add "interactive" action
     
     if args.action == 'build_docker':
         cmd = ['docker', 'build', '-t', args.name, args.path]
-        execute_shell_cmd(cmd,args.verbose)
+        execute_shell_cmd(cmd, args.verbose)
     
     elif args.action == 'build_ninja':
         generate_build_dot_ninja_from_targets(targets, sys.argv[0])
@@ -48,6 +50,7 @@ def main():
 
     elif args.action == 'debug':
         # TODO: Test connecting to a GDB server on the host. Can I just add 2331:2331 to the port list?
+        # TODO: Possible to start a GDB server in the background? If not, add "start_gdb_server" action
         cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
                 '-p', '{0}:{0}'.format(default_debug_port_number), "--network='host'", args.name, '/bin/bash', \
                 '-c', "gdbgui -g {0} -r --port {1} --args {2}".format(targets[args.target].debugger, \
