@@ -22,6 +22,7 @@ def main():
         execute_shell_cmd(cmd, args.verbose)
     
     elif args.action == 'build_ninja':
+        # TODO: Change this to use Docker?
         generate_build_dot_ninja_from_targets(targets, sys.argv[0])
     
     elif args.action == 'run':
