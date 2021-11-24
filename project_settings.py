@@ -6,7 +6,6 @@ default_debug_port_number = '5000'
 
 targets = {}
 
-target_str 				= "{0}.elf"
 common_flags 			= ["-Wall",
 						   "-Wextra"]
 debug_flags 			= ["-g3",
