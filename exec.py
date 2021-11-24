@@ -7,8 +7,6 @@ from ninja_generate import generate_build_dot_ninja_from_targets
 import argparse
 import os
 import sys
-from pyocd.core.helpers import ConnectHelper
-from pyocd.flash.file_programmer import FileProgrammer
 
 def main():
     args = get_command_line_args()
@@ -32,17 +30,7 @@ def main():
         execute_shell_cmd(cmd, args.verbose)
     
     elif args.action == 'flash':
-        # From https://pyocd.io/docs/api_examples.html
-        with ConnectHelper.session_with_chosen_probe() as session:
-            board = session.board
-            target = board.target
-            flash = target.memory_map.get_boot_memory()
-
-            # Load firmware into device.
-            FileProgrammer(session).program(targets[args.target].target_file_and_path)
-
-            # Reset and run.
-            # target.reset()
+        pass
 
     elif args.action == 'list':
         for target in args.target:

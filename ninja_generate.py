@@ -31,7 +31,7 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
         # Rule for using an archiver to create a static library from object files
         ninja_file.rule(
             name="archive", 
-            command="$archiver $flags $defines $out $in"
+            command="$archiver $flags $out $in"
         )
 
         # Rule for rebuilding "build.ninja" if any of the Python scripts are out-of-date
