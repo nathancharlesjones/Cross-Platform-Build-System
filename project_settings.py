@@ -76,52 +76,138 @@ gdtoa = target.library(
 
 targets[gdtoa.name] = gdtoa
 
-# STM32F1_debug_name 		= "blinky_STM32F1_debug"
-# STM32F1_debug_build_dir = "build/STM32F1/debug"
-# mcu_flags 				= ["-mcpu=cortex-m3",
-# 						   "-mthumb"]
-# STM32f1_debugger 		=	"arm-none-eabi-gdb"
-# STM32F1_debug = target.executable(
-# 	name 				= 	STM32F1_debug_name,
-# 	build_dir 			= 	STM32F1_debug_build_dir,
-# 	target 				= 	target_str.format(STM32F1_debug_name),
-# 	c_compiler 			= 	"arm-none-eabi-gcc",
-# 	c_flags 			= 	common_flags + debug_flags + mcu_flags,
-# 	assembler 			=	"arm-none-eabi-gcc",
-# 	as_flags 			=	["-x assembler-with-cpp"] + common_flags + mcu_flags,
-# 	linker 				= 	"arm-none-eabi-gcc",
-# 	linker_flags 		=	linker_flags_common + \
-# 							[map_file_str.format(STM32F1_debug_build_dir, STM32F1_debug_name),
-# 							 "--specs=nano.specs"]
-# 							 + mcu_flags,
-# 	linker_script 		=	"hardware/source/STM32F1/linker-script/STM32F103C8Tx_FLASH.ld",
-# 	defines 			=	["USE_HAL_DRIVER",
-# 							 "STM32F103xB"],
-# 	source_files 		= 	source_files_common + 
-# 							["hardware/source/STM32F1/source/STM32F1.c",
-# 							 "hardware/source/STM32F1/source/stm32f1xx_hal_msp.c",
-# 							 "hardware/source/STM32F1/source/stm32f1xx_it.c",
-# 							 "hardware/source/STM32F1/source/system_stm32f1xx.c",
-# 							 "libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio_ex.c",
-# 							 "libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c",
-# 							 "libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c",
-# 							 "libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c",
-# 							 "libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c",
-# 							 "libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc_ex.c",
-# 							 "libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c",
-# 							 "libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_dma.c",
-# 							 "libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.c",
-# 							 "libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c",
-# 							 "libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash.c",
-# 							 "libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c",
-# 							 "libraries/STM32CubeF1/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_exti.c",
-# 							 "hardware/source/STM32F1/source/startup_stm32f103xb.s"],
-# 	include_dirs 		= 	include_dirs,
-# 	libraries 			= 	libraries_common + \
-# 							["c", "nosys"],
-# 	debugger 			=	STM32f1_debugger,
-# 	post_build_cmds 	= 	["arm-none-eabi-size {0}/{1}".format(STM32F1_debug_build_dir, target_str.format(STM32F1_debug_name)),
-# 							 "arm-none-eabi-objcopy -O binary -S {0}/{1} {0}/{2}.bin".format(STM32F1_debug_build_dir, target_str.format(STM32F1_debug_name), STM32F1_debug_name)]
-# )
+libc_name 				= "c"
+libc_c_compiler 		= "gcc"
+libc_archiver 			= "ar"
+libc_source_files_assert	= ["src/assert/assert.c"]
+libc_source_files_ctype		= ["src/ctype/isalnum.c",
+							   "src/ctype/isalpha.c",
+							   "src/ctype/isascii.c",
+							   "src/ctype/isblank.c",
+							   "src/ctype/iscntrl.c",
+							   "src/ctype/isdigit.c",
+							   "src/ctype/isgraph.c",
+							   "src/ctype/islower.c",
+							   "src/ctype/isprint.c",
+							   "src/ctype/ispunct.c",
+							   "src/ctype/isspace.c",
+							   "src/ctype/isupper.c",
+							   "src/ctype/isxdigit.c",
+							   "src/ctype/toascii.c",
+							   "src/ctype/tolower.c",
+							   "src/ctype/toupper.c"]
+libc_source_files_locale	= ["src/locale/langinfo.c"]
+libc_source_files_math		= ["math/fabs.c",
+    						   "math/fabsf.c"]
+libc_source_files_stdio		= ["src/stdio/asprintf.c",
+    						   "src/stdio/putchar.c",
+    						   "src/stdio/puts.c",
+    						   "src/stdio/vasprintf.c"]
+libc_source_files_stdio_native	= ["src/stdio/putchar_native.c"]
+libc_source_files_stdlib	= ["src/stdlib/abs.c",
+							   "src/stdlib/atof.c",
+							   "src/stdlib/atoi.c",
+							   "src/stdlib/atol.c",
+							   "src/stdlib/atoll.c",
+							   "src/stdlib/bsearch.c",
+							   "src/stdlib/calloc.c",
+							   "src/stdlib/div.c",
+							   "src/stdlib/heapsort_r.c",
+							   "src/stdlib/heapsort.c",
+							   "src/stdlib/imaxabs.c",
+							   "src/stdlib/imaxdiv.c",
+							   "src/stdlib/labs.c",
+							   "src/stdlib/ldiv.c",
+							   "src/stdlib/llabs.c",
+							   "src/stdlib/lldiv.c",
+							   "src/stdlib/qsort_r.c",
+							   "src/stdlib/qsort.c",
+							   "src/stdlib/rand.c",
+							   "src/stdlib/realloc.c",
+							   "src/stdlib/strtol.c",
+							   "src/stdlib/strtold.c",
+							   "src/stdlib/strtoul.c",
+							   "src/stdlib/strtoll.c",
+							   "src/stdlib/strtoull.c"]
+libc_source_files_string	= ["src/string/memcmp.c",
+    						   "src/string/memcpy.c",
+    						   "src/string/memmem.c",
+    						   "src/string/memmove.c",
+    						   "src/string/memchr.c",
+    						   "src/string/memrchr.c",
+    						   "src/string/memset.c",
+    						   "src/string/strcat.c",
+    						   "src/string/strchr.c",
+    						   "src/string/strchrnul.c",
+    						   "src/string/strcmp.c",
+    						   "src/string/strcoll.c",
+    						   "src/string/strcpy.c",
+    						   "src/string/strcspn.c",
+    						   "src/string/strdup.c",
+    						   "src/string/strerror.c",
+    						   "src/string/strerror_r.c",
+    						   "src/string/strlen.c",
+    						   "src/string/strncat.c",
+    						   "src/string/strncmp.c",
+    						   "src/string/strncpy.c",
+    						   "src/string/strndup.c",
+    						   "src/string/strnlen.c",
+    						   "src/string/strnstr.c",
+    						   "src/string/strpbrk.c",
+    						   "src/string/strrchr.c",
+    						   "src/string/strspn.c",
+    						   "src/string/strstr.c",
+    						   "src/string/strtok.c",
+    						   "src/string/strxfrm.c"]
+libc_source_files_support	= ["src/support/fls.c",
+    						   "src/support/flsl.c",
+    						   "src/support/flsll.c"]
+libc_source_files_time		= ["src/time/asctime.c",
+    						   "src/time/asctime_r.c"]
+libc_source_files_wchar		= ["src/wchar/iswalnum.c",
+							   "src/wchar/iswalpha.c",
+							   "src/wchar/iswblank.c",
+							   "src/wchar/iswcntrl.c",
+							   "src/wchar/iswctype.c",
+							   "src/wchar/iswdigit.c",
+							   "src/wchar/iswgraph.c",
+							   "src/wchar/iswlower.c",
+							   "src/wchar/iswprint.c",
+							   "src/wchar/iswpunct.c",
+							   "src/wchar/iswspace.c",
+							   "src/wchar/iswupper.c",
+							   "src/wchar/iswxdigit.c",
+							   "src/wchar/towccase.c",
+							   "src/wchar/towctrans.c",
+							   "src/wchar/towlower.c",
+							   "src/wchar/towupper.c",
+							   "src/wchar/wcswidth.c",
+							   "src/wchar/wctrans.c",
+							   "src/wchar/wctype.c",
+							   "src/wchar/wcwidth.c"]
 
-# targets[STM32F1_debug.name] = STM32F1_debug
+libc = target.library(
+	name 				= 	libc_name,
+	build_dir 			= 	"build_PBS/c",
+	target 				= 	"{0}.a".format(libc_name),
+	c_compiler 			= 	libc_c_compiler,
+	c_flags 			= 	common_flags,
+	archiver 			=	libc_archiver,
+	archiver_flags 		= 	["rcs"],
+	source_files 		= 	#libc_source_files_assert + \
+							libc_source_files_ctype + \
+							libc_source_files_locale + \
+							#libc_source_files_math + \
+							#libc_source_files_stdio	+ \
+							#libc_source_files_stdio_native + \
+							libc_source_files_stdlib + \
+							libc_source_files_string + \
+							libc_source_files_support + \
+							#libc_source_files_time + \
+							libc_source_files_wchar,
+	include_dirs 		= 	["include",
+							 "arch/x86_64/include"],
+	post_build_cmds 	= 	["echo Finished building {0}".format(libc_name)]
+)
+
+targets[libc.name] = libc
