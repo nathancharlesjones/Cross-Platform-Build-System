@@ -35,7 +35,8 @@ def main():
     elif args.action == 'list':
         try:
             import json
-            print(json.dumps(targets, indent=4, sort_keys=args.sorted))
+            for target in args.target:
+                print(json.dumps(targets[target], indent=4, sort_keys=args.sorted))
         except:
             for target in args.target:
                 print("*"*50)
@@ -83,7 +84,7 @@ def get_command_line_args():
 
     list_targets = subparsers.add_parser('list', help="List all components of all available targets (specified in 'project_targets.py'). If '-t' is used, list all components of just the target specified after '-t'.")
     list_targets.add_argument('-t', '--target', nargs=1, choices=list(targets), default=list(targets), help="Target to be listed.")
-    list_targets.add_argument('-s', '--sorted', dest="sorted", default=False, action='store_true', help="Sort the targets and target fields (such as 'name' or 'c_flags') alphabetically if specified. Only works if json library is already installed.")
+    list_targets.add_argument('-s', '--sorted', dest="sorted", default=False, action='store_true', help="Sort the target fields (such as 'name' or 'c_flags') alphabetically if specified. Only works if json library is already installed.")
 
     start_debug_session = subparsers.add_parser('debug', help="Start a debug session in gdbgui with the specified target. After running, open a browser on the host machine and navigate to 'localhost:PORT' (default: {0}) to see the gdbgui instance.".format(default_debug_port_number))
     start_debug_session.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is '{0}'.".format(default_docker_name))
