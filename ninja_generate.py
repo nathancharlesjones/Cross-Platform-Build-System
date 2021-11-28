@@ -1,5 +1,5 @@
 import ninja_syntax
-from helper import get_file_extension, execute_shell_cmd
+from helper import get_file_extension, execute_shell_cmd, prepare_target_for_building
 import os
 from functools import reduce
 
@@ -51,53 +51,85 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
 
         # For each target in project_settings.py...
         for target in targets:
+            
+            thisTarget = targets[target]
 
-            # Compile all of the source files into object files...
-            for source_file in targets[target].source_files:
+            # Check for error conditions (such as a missing "build_dir" or no source files).
+            # Define dependent keys such as "target_file_and_path" and object files.
+            # Set all possible keys to empty values if not defined.
+            prepare_target_for_building(thisTarget)
+
+            # Form the string for defines by prefixing each item in targets[target].defines with "-D"
+            define_str = ' '.join(["-D"+define for define in thisTarget["defines"]])
+
+            # Form the string for include dirs by prefixing each item in targets[target].include_dirs with "-I "
+            include_dirs_str = ' '.join(["-I "+inc_dir for inc_dir in thisTarget["include_dirs"]])
+            
+            for source_file in thisTarget["obj_files_dict"]:
 
                 # Get the right compiler/assembler and flags, based on source file extension
+
                 if get_file_extension(source_file) == ".cpp":
-                    program = targets[target].cpp_compiler
-                    flags = targets[target].cpp_flags
+                    program = thisTarget["cpp_compiler"]
+                    flags = thisTarget["cpp_flags"]
                 elif get_file_extension(source_file) == ".c":
-                    program = targets[target].c_compiler
-                    flags = targets[target].c_flags
+                    program = thisTarget["c_compiler"]
+                    flags = thisTarget["c_flags"]
                 elif get_file_extension(source_file) == ".s" or get_file_extension(source_file) == ".S":
-                    program = targets[target].assembler
-                    flags = targets[target].as_flags
+                    program = thisTarget["assembler"]
+                    flags = thisTarget["as_flags"]
                 else:
                     raise ValueError("Unrecognized file extension in source files: {0}".format(get_file_extension(source_file)))
                 
-                # Form the string for defines by prefixing each item in targets[target].defines with "-D"
-                define_str = ' '.join(["-D"+define for define in targets[target].defines])
+                # Form the string for the compiler/assembler flags by prefixing each item in flags with "-W"
+                flags_str = ' '.join(["-W"+flag for flag in flags])
 
-                # Form the string for include dirs by prefixing each item in targets[target].include_dirs with "-I "
-                include_dirs_str = ' '.join(["-I "+inc_dir for inc_dir in targets[target].include_dirs])
-
-                # Form the path for the object file by replacing the source file extension with ".o" (e.g.
-                # "src/sub1/main.c" becomes "src/sub1/main.o") and prefixing the result with the path to the 
-                # build dir (e.g. "src/sub1/main.o" becomes "build/src/sub1/main.o").
-                obj_file = "{0}/{1}".format(targets[target].build_dir,source_file.replace(get_file_extension(source_file), ".o"))
-                
-                # Append item to list of object files (used later by add_final_build_edge)
-                targets[target].obj_files.append(obj_file)
-                
                 # Add the build edge for this specific object file
                 ninja_file.build(
-                    outputs=obj_file, 
+                    outputs=thisTarget["obj_files_dict"][source_file], 
                     rule="compile", 
                     inputs=source_file, 
                     variables=
                     {
                         'compiler':program, 
-                        'flags':' '.join(flags),
+                        'flags':flags_str,
                         'defines':define_str,
                         'include_dirs':include_dirs_str
                     }
                 )
 
             # Add build edge to build final target (based on target type)
-            targets[target].add_final_build_edge(ninja_file)
+            if( get_file_extension(thisTarget["target"]) == ".a" ):
+                ninja_file.build(
+                    outputs=thisTarget["target_file_and_path"], 
+                    rule="archive", 
+                    inputs=list(thisTarget["obj_files_dict"].values()),
+                    implicit=[lib.target_file_and_path for lib in thisTarget["local_dependencies"]],
+                    variables=
+                    {
+                        'archiver':thisTarget["archiver"],
+                        'flags':' '.join(thisTarget["archiver_flags"])
+                    }
+                )
+            else:
+                library_dirs_str = ' '.join(["-L "+lib_dir for lib_dir in thisTarget["library_dirs"]])
+                libraries_str = ' '.join(["-l"+lib for lib in thisTarget["libraries"]])
+                ninja_file.build(
+                    outputs=thisTarget["target_file_and_path"], 
+                    rule="link", 
+                    inputs=list(thisTarget["obj_files_dict"].values()),
+                    implicit=[lib.target_file_and_path for lib in thisTarget["local_dependencies"]],
+                    variables=
+                    {
+                        'linker':thisTarget["linker"],
+                        'linker_flags':' '.join(thisTarget["linker_flags"]),
+                        'linker_script':"-T " + thisTarget["linker_script"] if targets[target]["linker_script"] else '',
+                        'defines':define_str,
+                        'include_dirs':include_dirs_str,
+                        'library_dirs':library_dirs_str,
+                        'libraries':libraries_str
+                    }
+                )
 
             # Add one or two extra build edges to either:
             #  - Allow for post-build commands to be run every time the project is built, or
@@ -139,35 +171,35 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
 
             # So the pattern is...
             # if the target DOES have post-build commands...
-            if len(targets[target].post_build_cmds) > 0:
+            if len(thisTarget["post_build_cmds"]) > 0:
 
                 # ...Add the rule "name_post_build_cmds"
                 ninja_file.rule(
-                    name=targets[target].name+"_post_build_cmd",
-                    command=reduce(lambda a, b: a + " && " + b, targets[target].post_build_cmds)
+                    name=thisTarget["name"]+"_post_build_cmd",
+                    command=reduce(lambda a, b: a + " && " + b, thisTarget["post_build_cmds"])
                 )
                 
                 # ...And the build edge that runs "name_post_build_cmd" with an implicit
                 # dependency on "name.ext"
                 ninja_file.build(
-                    outputs=targets[target].name+"_post_build_cmd",
-                    rule=targets[target].name+"_post_build_cmd",
-                    implicit=targets[target].target_file_and_path,
+                    outputs=thisTarget["name"]+"_post_build_cmd",
+                    rule=thisTarget["name"]+"_post_build_cmd",
+                    implicit=thisTarget["target_file_and_path"],
                 )
 
                 # ...And set the implicit dependency for the final target to "name_post_build_cmds"
-                implicit = targets[target].name+"_post_build_cmd"
+                implicit = thisTarget["name"]+"_post_build_cmd"
 
             # ...but if the target does NOT have any post-build commands...
             else:
 
                 # ...Just set the implicit dependency for the final target to "name.ext"
-                implicit = targets[target].target_file_and_path
+                implicit = thisTarget["target_file_and_path"]
 
             # Lastly, add the build edge for the final target of "name", with the implicit dependency
             # that was set above.
             ninja_file.build(
-                outputs=targets[target].name,
+                outputs=thisTarget["name"],
                 rule='phony',
                 implicit=implicit
             )

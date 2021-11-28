@@ -1,4 +1,5 @@
 import target
+from helper import mergesum
 
 default_path_to_docker_file = '.'
 default_docker_name = 'devenv-simple-build-system'
@@ -6,79 +7,83 @@ default_debug_port_number = '5000'
 
 targets = {}
 
-common_flags 			= ["-Wall",
-						   "-Wextra"]
-debug_flags 			= ["-g3",
-						   "-O0"]
-release_flags			= ["-O3"]
-map_file_str			= "-Wl,-Map,{0}/{1}.map,--cref"
+def add_common_settings(target):
+	common_build_dir = "build_PBS"
+	common = 	{
+					"build_dir"		: 	common_build_dir + "/" + target["name"],
+					"c_flags"		: [	"all",
+							   			"extra"]
+				}
+	return mergesum(target, common)
 
-gdtoa_name 				= "gdtoa"
-gdtoa_c_compiler 		= "gcc"
-gdtoa_archiver 			= "ar"
+gdtoa = {}
+gdtoa["name"]				= 	"gdtoa"
+gdtoa = add_common_settings(gdtoa)
+gdtoa["target_type"]		= 	"library" # Can I just check target for .a?
+gdtoa["target"]				= 	"{0}.a".format(gdtoa["name"])
+gdtoa["c_compiler"]			= 	"gcc"
+gdtoa["defines"]			= [	"NO_ERRNO",
+								"IFNAN_CHECK",
+								"GDTOA_NO_ASSERT",
+								"NO_FENV_H"]
+gdtoa["archiver"]			= 	"gcc-ar"
+gdtoa["archiver_flags"]		= [	"rcs"]
+gdtoa["source_files"]		= [ "src/gdtoa/src/dmisc.c",
+								"src/gdtoa/src/dtoa.c",
+								"src/gdtoa/src/g__fmt.c",
+								"src/gdtoa/src/g_ddfmt.c",
+								"src/gdtoa/src/g_dfmt.c",
+								"src/gdtoa/src/g_ffmt.c",
+								"src/gdtoa/src/g_Qfmt.c",
+								"src/gdtoa/src/g_xfmt.c",
+								"src/gdtoa/src/g_xLfmt.c",
+								"src/gdtoa/src/gdtoa.c",
+								"src/gdtoa/src/gethex.c",
+								"src/gdtoa/src/gmisc.c",
+								"src/gdtoa/src/hd_init.c",
+								"src/gdtoa/src/hexnan.c",
+								"src/gdtoa/src/misc.c",
+								"src/gdtoa/src/smisc.c",
+								"src/gdtoa/src/strtod.c",
+								"src/gdtoa/src/strtodg.c",
+								"src/gdtoa/src/strtodI.c",
+								"src/gdtoa/src/strtof.c",
+								"src/gdtoa/src/strtoId.c",
+								"src/gdtoa/src/strtoIdd.c",
+								"src/gdtoa/src/strtoIf.c",
+								"src/gdtoa/src/strtoIg.c",
+								"src/gdtoa/src/strtoIQ.c",
+								"src/gdtoa/src/strtoIx.c",
+								"src/gdtoa/src/strtoIxL.c",
+								"src/gdtoa/src/strtopd.c",
+								"src/gdtoa/src/strtopdd.c",
+								"src/gdtoa/src/strtopf.c",
+								"src/gdtoa/src/strtopQ.c",
+								"src/gdtoa/src/strtopx.c",
+								"src/gdtoa/src/strtopxL.c",
+								"src/gdtoa/src/strtord.c",
+								"src/gdtoa/src/strtordd.c",
+								"src/gdtoa/src/strtorf.c",
+								"src/gdtoa/src/strtorQ.c",
+								"src/gdtoa/src/strtorx.c",
+								"src/gdtoa/src/strtorxL.c",
+								"src/gdtoa/src/sum.c",
+								"src/gdtoa/src/ulp.c"]
+gdtoa["include_dirs"] 		= [	"src/gdtoa/include"]
+gdtoa["post_build_cmds"]	= [	"echo Finished building {0}".format(gdtoa["name"])]
 
-gdtoa = target.library(
-	name 				= 	gdtoa_name,
-	build_dir 			= 	"build_PBS/gdtoa",
-	target 				= 	"{0}.a".format(gdtoa_name),
-	c_compiler 			= 	gdtoa_c_compiler,
-	c_flags 			= 	common_flags,
-	defines 			=	["NO_ERRNO",
-							 "IFNAN_CHECK",
-							 "GDTOA_NO_ASSERT",
-							 "NO_FENV_H"],
-	archiver 			=	gdtoa_archiver,
-	archiver_flags 		= 	["rcs"],
-	source_files 		= 	["src/gdtoa/src/dmisc.c",
-							 "src/gdtoa/src/dtoa.c",
-							 "src/gdtoa/src/g__fmt.c",
-							 "src/gdtoa/src/g_ddfmt.c",
-							 "src/gdtoa/src/g_dfmt.c",
-							 "src/gdtoa/src/g_ffmt.c",
-							 "src/gdtoa/src/g_Qfmt.c",
-							 "src/gdtoa/src/g_xfmt.c",
-							 "src/gdtoa/src/g_xLfmt.c",
-							 "src/gdtoa/src/gdtoa.c",
-							 "src/gdtoa/src/gethex.c",
-							 "src/gdtoa/src/gmisc.c",
-							 "src/gdtoa/src/hd_init.c",
-							 "src/gdtoa/src/hexnan.c",
-							 "src/gdtoa/src/misc.c",
-							 "src/gdtoa/src/smisc.c",
-							 "src/gdtoa/src/strtod.c",
-							 "src/gdtoa/src/strtodg.c",
-							 "src/gdtoa/src/strtodI.c",
-							 "src/gdtoa/src/strtof.c",
-							 "src/gdtoa/src/strtoId.c",
-							 "src/gdtoa/src/strtoIdd.c",
-							 "src/gdtoa/src/strtoIf.c",
-							 "src/gdtoa/src/strtoIg.c",
-							 "src/gdtoa/src/strtoIQ.c",
-							 "src/gdtoa/src/strtoIx.c",
-							 "src/gdtoa/src/strtoIxL.c",
-							 "src/gdtoa/src/strtopd.c",
-							 "src/gdtoa/src/strtopdd.c",
-							 "src/gdtoa/src/strtopf.c",
-							 "src/gdtoa/src/strtopQ.c",
-							 "src/gdtoa/src/strtopx.c",
-							 "src/gdtoa/src/strtopxL.c",
-							 "src/gdtoa/src/strtord.c",
-							 "src/gdtoa/src/strtordd.c",
-							 "src/gdtoa/src/strtorf.c",
-							 "src/gdtoa/src/strtorQ.c",
-							 "src/gdtoa/src/strtorx.c",
-							 "src/gdtoa/src/strtorxL.c",
-							 "src/gdtoa/src/sum.c",
-							 "src/gdtoa/src/ulp.c"],
-	include_dirs 		= 	["src/gdtoa/include"],
-	post_build_cmds 	= 	["echo Finished building {0}".format(gdtoa_name)]
-)
+targets[gdtoa["name"]] = gdtoa
 
-targets[gdtoa.name] = gdtoa
 
-libc_name 				= "c"
-libc_c_compiler 		= "gcc"
-libc_archiver 			= "ar"
+libc = {}
+libc["name"] 				= 	"c"
+libc = add_common_settings(libc)
+libc["target_type"]			= 	"library" # Can I just check target for .a?
+libc["target"]				= 	"{0}.a".format(libc["name"])
+libc["c_compiler"]			=	"gcc"
+libc["archiver"]			= 	"gcc-ar"
+libc["archiver_flags"]		= [	"rcs"]
+
 libc_source_files_assert	= ["src/assert/assert.c"]
 libc_source_files_ctype		= ["src/ctype/isalnum.c",
 							   "src/ctype/isalpha.c",
@@ -186,28 +191,21 @@ libc_source_files_wchar		= ["src/wchar/iswalnum.c",
 							   "src/wchar/wctype.c",
 							   "src/wchar/wcwidth.c"]
 
-libc = target.library(
-	name 				= 	libc_name,
-	build_dir 			= 	"build_PBS/c",
-	target 				= 	"{0}.a".format(libc_name),
-	c_compiler 			= 	libc_c_compiler,
-	c_flags 			= 	common_flags,
-	archiver 			=	libc_archiver,
-	archiver_flags 		= 	["rcs"],
-	source_files 		= 	#libc_source_files_assert + \
-							libc_source_files_ctype + \
-							libc_source_files_locale + \
-							#libc_source_files_math + \
-							#libc_source_files_stdio	+ \
-							#libc_source_files_stdio_native + \
-							libc_source_files_stdlib + \
-							libc_source_files_string + \
-							libc_source_files_support + \
-							#libc_source_files_time + \
-							libc_source_files_wchar,
-	include_dirs 		= 	["include",
-							 "arch/x86_64/include"],
-	post_build_cmds 	= 	["echo Finished building {0}".format(libc_name)]
-)
+libc["source_files"]		= []
+libc["source_files"] 		+= 	libc_source_files_assert
+libc["source_files"] 		+= 	libc_source_files_ctype
+libc["source_files"] 		+= 	libc_source_files_locale
+#libc["source_files"] 		+= 	libc_source_files_math
+#libc["source_files"] 		+= 	libc_source_files_stdio
+#libc["source_files"] 		+= 	libc_source_files_stdio_native
+libc["source_files"] 		+= 	libc_source_files_stdlib
+libc["source_files"] 		+= 	libc_source_files_string
+libc["source_files"] 		+= 	libc_source_files_support
+#libc["source_files"] 		+= 	libc_source_files_time
+libc["source_files"] 		+= 	libc_source_files_wchar
 
-targets[libc.name] = libc
+libc["include_dirs"] 		= 	["include",
+								 "arch/x86_64/include"]
+libc["post_build_cmds"] 	= 	["echo Finished building {0}".format(libc["name"])]
+
+targets[libc["name"]] = libc
