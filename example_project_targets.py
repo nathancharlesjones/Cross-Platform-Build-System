@@ -15,7 +15,6 @@ libtest = target.library(
 	target 				= 	libtest_target,
 	source_files 		= 	["lib/test/src/test_func.c"],
 	include_dirs 		= 	["lib/test/inc"],
-	pre_build_cmds 		= 	["echo Beginning build for " + libtest_name],
 	post_build_cmds 	= 	["echo Finished building " + libtest_name]
 )
 
@@ -37,7 +36,6 @@ hello_world = target.executable(
 	libraries 			= 	["test", "m"],
 	library_dirs 		= 	[libtest_build_dir],
 	local_dependencies 	= 	[libtest],
-	pre_build_cmds 		= 	["echo Beginning build for " + hello_world_name],
 	post_build_cmds 	= 	["echo Finished building " + hello_world_name,
 							 "./{0}/{1}".format(hello_world_build_dir, hello_world_target)]
 )
