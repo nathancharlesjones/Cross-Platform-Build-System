@@ -18,7 +18,6 @@ def main():
     # TODO: Add "clean" action
     # TODO: Add "clean_and_build" action
     # TODO: Add "docker_bash" action
-    # TODO: build_docker & build_ninja need to be run from inside build system folder, but run has to be from project folder??
     
     if args.action == 'build_docker':
         cmd = ['docker', 'build', '-t', args.name, args.path]
@@ -28,10 +27,10 @@ def main():
         # TODO: Change this to use Docker?
         generate_build_dot_ninja_from_targets(targets, sys.argv[0])
     
-    elif args.action == 'run':
+    elif args.action == 'build_target':
         cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
-                args.name, '/bin/bash', '-c', args.command]
-        execute_shell_cmd(cmd, args.verbose)
+                args.name, '/bin/bash', '-c', args.target]
+        #execute_shell_cmd(cmd, args.verbose)
     
     elif args.action == 'list':
         try:
@@ -51,6 +50,11 @@ def main():
                 '-p', '{0}:{0}'.format(default_debug_port_number), "--network='host'", args.name, '/bin/bash', \
                 '-c', "gdbgui -g {0} -r --port {1} --args {2}".format(targets[args.target].debugger, \
                 default_debug_port_number, targets[args.target].target_file_and_path)]
+        execute_shell_cmd(cmd, args.verbose)
+    
+    elif args.action == 'run':
+        cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
+                args.name, '/bin/bash', '-c', args.command]
         execute_shell_cmd(cmd, args.verbose)
     
     elif args.action == 'push':
@@ -76,9 +80,9 @@ def get_command_line_args():
 
     build_ninja_file = subparsers.add_parser('build_ninja', help='''(Re)Build the file 'build.ninja' according to the project specifications defined in 'project_targets.py'. Once generated, used "exec.py run -c 'ninja'" to use Docker to build all targets in the project.''')
 
-    run_docker_cmd = subparsers.add_parser('run', help="Run the specified command in Docker.")
-    run_docker_cmd.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is {0}.".format(default_docker_name))
-    run_docker_cmd.add_argument('-c', '--command', required=True, help="The command to be run.")
+    build_target = subparsers.add_parser('build_target', help="Build all of the project targets. If '-t' is used, build just the target specified after '-t'.")
+    build_target.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is {0}.".format(default_docker_name))
+    build_target.add_argument('-t', '--target', nargs=1, choices=list(targets), default=list(targets), help="Target to be built.")
 
     #flash_binary = subparsers.add_parser('flash', help="Flash the specified binary to an attached MCU.")
     #flash_binary.add_argument('-t', '--target', choices=list(targets), required=True, help="Target that is to be flashed to the attached MCU.")
@@ -92,6 +96,10 @@ def get_command_line_args():
     start_debug_session.add_argument('-t', '--target', choices=list(targets), required=True, help="Target that is to be debugged.")
     start_debug_session.add_argument('-p', '--port', default=default_debug_port_number, help="Port number to be used to connect to gdbgui; default is {0}.".format(default_debug_port_number))
 
+    run_docker_cmd = subparsers.add_parser('run', help="Run the specified command in Docker.")
+    run_docker_cmd.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is {0}.".format(default_docker_name))
+    run_docker_cmd.add_argument('-c', '--command', required=True, help="The command to be run.")
+    
     git_push = subparsers.add_parser('push', help="Execute 'git add . && git commit -m MESSAGE && git push'.")
     git_push.add_argument('-m', '--message', required=True, help="The commit message.")
 
