@@ -14,7 +14,6 @@ def main():
         print(args)
 
     # TODO: Test that all of the Docker stuff works on Linux, too
-    # TODO: Add "build_target" action
     # TODO: Add "clean" action
     # TODO: Add "clean_and_build" action
     # TODO: Add "docker_bash" action
@@ -28,8 +27,8 @@ def main():
     
     elif args.action == 'build_target':
         cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
-                args.name, '/bin/bash', '-c', args.target]
-        #execute_shell_cmd(cmd, args.verbose)
+                args.name, '/bin/bash', '-c', 'ninja ' + ' '.join(args.target)]
+        execute_shell_cmd(cmd, args.verbose)
     
     elif args.action == 'list':
         for target in args.target:
@@ -42,6 +41,11 @@ def main():
                 '-p', '{0}:{0}'.format(default_debug_port_number), "--network='host'", args.name, '/bin/bash', \
                 '-c', "gdbgui -g {0} -r --port {1} --args {2}".format(targets[args.target].debugger, \
                 default_debug_port_number, targets[args.target].target_file_and_path)]
+        execute_shell_cmd(cmd, args.verbose)
+    
+    elif args.action == 'docker_bash':
+        cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
+                args.name, '/bin/bash']
         execute_shell_cmd(cmd, args.verbose)
     
     elif args.action == 'run':
@@ -86,6 +90,9 @@ def get_command_line_args():
     start_debug_session.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is '{0}'.".format(default_docker_name))
     start_debug_session.add_argument('-t', '--target', choices=list(targets), required=True, help="Target that is to be debugged.")
     start_debug_session.add_argument('-p', '--port', default=default_debug_port_number, help="Port number to be used to connect to gdbgui; default is {0}.".format(default_debug_port_number))
+
+    docker_bash = subparsers.add_parser('docker_bash', help='''Open up Docker in interactive mode.''')
+    docker_bash.add_argument('-n', '--name', default=default_docker_name, help="Name to be associated with the Docker image once built; default is '{0}'.".format(default_docker_name))
 
     run_docker_cmd = subparsers.add_parser('run', help="Run the specified command in Docker.")
     run_docker_cmd.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is {0}.".format(default_docker_name))
