@@ -46,15 +46,13 @@ class target:
         pass
 
 class executable(target):
-    """ Helpful docstring """
-
+    
     def __init__(self,linker,build_dir,target,source_files,name='unnamed target',
         assembler='',as_flags=[],c_compiler='',c_flags=[],cpp_compiler='',cpp_flags=[],
         defines=[],linker_flags=[],include_dirs=[],libraries=[],library_dirs=[],
         linker_script='',local_dependencies=[],post_build_cmds=[],
         debugger=''):
-        """ Helpful docstring """
-
+        
         super().__init__(build_dir,target,source_files,name,
         assembler,as_flags,c_compiler,c_flags,cpp_compiler,cpp_flags,
         defines,include_dirs,libraries,library_dirs,
@@ -113,14 +111,12 @@ class executable(target):
         return repr
 
 class library(target):
-    """ Helpful docstring """
-
+    
     def __init__(self,archiver,build_dir,target,source_files,name='unnamed target',
         assembler='',as_flags=[],c_compiler='',c_flags=[],cpp_compiler='',cpp_flags=[],
         defines=[],archiver_flags=[],include_dirs=[],libraries=[],
         library_dirs=[],local_dependencies=[],post_build_cmds=[]):
-        """ Helpful docstring """
-
+        
         super().__init__(build_dir,target,source_files,name,
         assembler,as_flags,c_compiler,c_flags,cpp_compiler,cpp_flags,
         defines,include_dirs,libraries,library_dirs,

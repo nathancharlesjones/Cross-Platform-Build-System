@@ -4,3 +4,5 @@ __pycache__
 .ninja_deps
 .ninja_log
 build.ninja
+build
+project_settings.py
