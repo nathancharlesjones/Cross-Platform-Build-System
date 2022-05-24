@@ -14,10 +14,6 @@ def main():
         print(args)
 
     # TODO: Test that all of the Docker stuff works on Linux, too
-    # TODO: Add "clean" action
-    # TODO: Add "clean_and_build" action
-    # TODO: Add "docker_bash" action
-    
     if args.action == 'build_docker':
         cmd = ['docker', 'build', '-t', args.name, args.path]
         execute_shell_cmd(cmd, args.verbose)
@@ -25,15 +21,28 @@ def main():
     elif args.action == 'build_ninja':
         generate_build_dot_ninja_from_targets(targets, sys.argv[0])
     
+    elif args.action == 'list':
+        for target in args.target:
+            print(targets[target])
+    
     elif args.action == 'build_target':
         cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
                 args.name, '/bin/bash', '-c', 'ninja ' + ' '.join(args.target)]
         execute_shell_cmd(cmd, args.verbose)
     
-    elif args.action == 'list':
-        for target in args.target:
-            print(targets[target])
-
+    elif args.action == 'clean':
+        cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
+                args.name, '/bin/bash', '-c', 'ninja -t clean']
+        execute_shell_cmd(cmd, args.verbose)
+    
+    elif args.action == 'clean_build':
+        cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
+                args.name, '/bin/bash', '-c', 'ninja -t clean']
+        execute_shell_cmd(cmd, args.verbose)
+        cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
+                args.name, '/bin/bash', '-c', 'ninja ' + ' '.join(args.target)]
+        execute_shell_cmd(cmd, args.verbose)
+    
     elif args.action == 'debug':
         # TODO: Test connecting to a GDB server on the host. Can I just add 2331:2331 to the port list?
         # TODO: Possible to start a GDB server in the background? If not, add "start_gdb_server" action
@@ -76,15 +85,24 @@ def get_command_line_args():
 
     build_ninja_file = subparsers.add_parser('build_ninja', help='''(Re)Build the file 'build.ninja' according to the project specifications defined in 'project_targets.py'. Once generated, used "exec.py run -c 'ninja'" to use Docker to build all targets in the project.''')
 
+    list_targets = subparsers.add_parser('list', help="List all components of all available targets (specified in 'project_targets.py'). If '-t' is used, list all components of just the target specified after '-t'.")
+    list_targets.add_argument('-t', '--target', nargs=1, choices=list(targets), default=list(targets), help="Target to be listed.")
+
     build_target = subparsers.add_parser('build_target', help="Build all of the project targets. If '-t' is used, build just the target specified after '-t'.")
     build_target.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is {0}.".format(default_docker_name))
     build_target.add_argument('-t', '--target', nargs=1, choices=list(targets), default=list(targets), help="Target to be built.")
 
-    #flash_binary = subparsers.add_parser('flash', help="Flash the specified binary to an attached MCU.")
-    #flash_binary.add_argument('-t', '--target', choices=list(targets), required=True, help="Target that is to be flashed to the attached MCU.")
+    clean = subparsers.add_parser('clean', help="Run 'ninja -t clean'.")
+    clean.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is {0}.".format(default_docker_name))
 
-    list_targets = subparsers.add_parser('list', help="List all components of all available targets (specified in 'project_targets.py'). If '-t' is used, list all components of just the target specified after '-t'.")
-    list_targets.add_argument('-t', '--target', nargs=1, choices=list(targets), default=list(targets), help="Target to be listed.")
+    clean_and_build = subparsers.add_parser('clean_build', help="Run 'ninja -t clean' and then build all of the project targets. If '-t' is used, build just the target specified after '-t'.")
+    clean_and_build.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is {0}.".format(default_docker_name))
+    clean_and_build.add_argument('-t', '--target', nargs=1, choices=list(targets), default=list(targets), help="Target to be built.")
+
+    # TODO: Figure out how to clean up a specific target in ninja with my build.ninja file
+    #clean = subparsers.add_parser('clean', help="Clean project files. Runs 'ninja -t clean' by default. To specify a target to be cleaned, use the -t option.")
+    #clean.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is {0}.".format(default_docker_name))
+    #clean.add_argument('-t', '--target', nargs=1, choices=list(targets), default=list(targets), help="Target to be built.")
 
     start_debug_session = subparsers.add_parser('debug', help="Start a debug session in gdbgui with the specified target. After running, open a browser on the host machine and navigate to 'localhost:PORT' (default: {0}) to see the gdbgui instance.".format(default_debug_port_number))
     start_debug_session.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is '{0}'.".format(default_docker_name))

@@ -41,7 +41,6 @@ def generate_build_dot_ninja_from_targets(targets, path_to_exec):
             generator=1
         )
 
-
         # Build edge for rebuilding "build.ninja" if any of the Python scripts are out-of-date
         ninja_file.build(
             outputs='build.ninja',
