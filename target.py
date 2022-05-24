@@ -109,7 +109,6 @@ class executable(target):
                 "- library_dirs:".ljust(padding,'.') + convert_list_to_str_for_printing(self.library_dirs, padding) + "\n" + \
                 "- local_dependencies:".ljust(padding,'.') + convert_list_to_str_for_printing([dep.name for dep in self.local_dependencies], padding) + "\n" + \
                 "- debugger:".ljust(padding,'.') + self.debugger + "\n" + \
-                "- pre_build_cmds:".ljust(padding,'.') + convert_list_to_str_for_printing(self.pre_build_cmds, padding) + "\n" + \
                 "- post_build_cmds:".ljust(padding,'.') + convert_list_to_str_for_printing(self.post_build_cmds, padding) + "\n" + "*"*40
         return repr
 
@@ -165,6 +164,5 @@ class library(target):
                 "- libraries:".ljust(padding,'.') + convert_list_to_str_for_printing(self.libraries, padding) + "\n" + \
                 "- library_dirs:".ljust(padding,'.') + convert_list_to_str_for_printing(self.library_dirs, padding) + "\n" + \
                 "- local_dependencies:".ljust(padding,'.') + convert_list_to_str_for_printing([dep.name for dep in self.local_dependencies], padding) + "\n" + \
-                "- pre_build_cmds:".ljust(padding,'.') + convert_list_to_str_for_printing(self.pre_build_cmds, padding) + "\n" + \
                 "- post_build_cmds:".ljust(padding,'.') + convert_list_to_str_for_printing(self.post_build_cmds, padding) + "\n" + "*"*40
         return repr

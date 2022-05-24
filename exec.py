@@ -7,8 +7,6 @@ from ninja_generate import generate_build_dot_ninja_from_targets
 import argparse
 import os
 import sys
-from pyocd.core.helpers import ConnectHelper
-from pyocd.flash.file_programmer import FileProgrammer
 
 def main():
     args = get_command_line_args()
@@ -16,8 +14,11 @@ def main():
         print(args)
 
     # TODO: Test that all of the Docker stuff works on Linux, too
-    # TODO: Add "ninja" action? "clean" action?
-    # TODO: Add "interactive" action
+    # TODO: Add "build_target" action
+    # TODO: Add "clean" action
+    # TODO: Add "clean_and_build" action
+    # TODO: Add "docker_bash" action
+    # TODO: build_docker & build_ninja need to be run from inside build system folder, but run has to be from project folder??
     
     if args.action == 'build_docker':
         cmd = ['docker', 'build', '-t', args.name, args.path]
@@ -31,19 +32,6 @@ def main():
                 args.name, '/bin/bash', '-c', args.command]
         execute_shell_cmd(cmd, args.verbose)
     
-    elif args.action == 'flash':
-        # From https://pyocd.io/docs/api_examples.html
-        with ConnectHelper.session_with_chosen_probe() as session:
-            board = session.board
-            target = board.target
-            flash = target.memory_map.get_boot_memory()
-
-            # Load firmware into device.
-            FileProgrammer(session).program(targets[args.target].target_file_and_path)
-
-            # Reset and run.
-            # target.reset()
-
     elif args.action == 'list':
         for target in args.target:
             print(targets[target])
@@ -84,8 +72,8 @@ def get_command_line_args():
     run_docker_cmd.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is {0}.".format(default_docker_name))
     run_docker_cmd.add_argument('-c', '--command', required=True, help="The command to be run.")
 
-    flash_binary = subparsers.add_parser('flash', help="Flash the specified binary to an attached MCU.")
-    flash_binary.add_argument('-t', '--target', choices=list(targets), required=True, help="Target that is to be flashed to the attached MCU.")
+    #flash_binary = subparsers.add_parser('flash', help="Flash the specified binary to an attached MCU.")
+    #flash_binary.add_argument('-t', '--target', choices=list(targets), required=True, help="Target that is to be flashed to the attached MCU.")
 
     list_targets = subparsers.add_parser('list', help="List all components of all available targets (specified in 'project_targets.py'). If '-t' is used, list all components of just the target specified after '-t'.")
     list_targets.add_argument('-t', '--target', nargs=1, choices=list(targets), default=list(targets), help="Target to be listed.")
