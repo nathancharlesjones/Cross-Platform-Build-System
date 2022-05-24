@@ -24,7 +24,6 @@ def main():
         execute_shell_cmd(cmd, args.verbose)
     
     elif args.action == 'build_ninja':
-        # TODO: Change this to use Docker?
         generate_build_dot_ninja_from_targets(targets, sys.argv[0])
     
     elif args.action == 'build_target':
@@ -33,15 +32,8 @@ def main():
         #execute_shell_cmd(cmd, args.verbose)
     
     elif args.action == 'list':
-        try:
-            import json
-            for target in args.target:
-                print(json.dumps(targets[target], indent=4, sort_keys=args.sorted))
-        except:
-            for target in args.target:
-                print("*"*50)
-                print("\n".join("{0}{1}".format(key.ljust(25, '.'), value) for key, value in targets[target].items()))
-                print("*"*50)
+        for target in args.target:
+            print(targets[target])
 
     elif args.action == 'debug':
         # TODO: Test connecting to a GDB server on the host. Can I just add 2331:2331 to the port list?
@@ -89,7 +81,6 @@ def get_command_line_args():
 
     list_targets = subparsers.add_parser('list', help="List all components of all available targets (specified in 'project_targets.py'). If '-t' is used, list all components of just the target specified after '-t'.")
     list_targets.add_argument('-t', '--target', nargs=1, choices=list(targets), default=list(targets), help="Target to be listed.")
-    list_targets.add_argument('-s', '--sorted', dest="sorted", default=False, action='store_true', help="Sort the target fields (such as 'name' or 'c_flags') alphabetically if specified. Only works if json library is already installed.")
 
     start_debug_session = subparsers.add_parser('debug', help="Start a debug session in gdbgui with the specified target. After running, open a browser on the host machine and navigate to 'localhost:PORT' (default: {0}) to see the gdbgui instance.".format(default_debug_port_number))
     start_debug_session.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is '{0}'.".format(default_docker_name))
