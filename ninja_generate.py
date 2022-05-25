@@ -3,7 +3,7 @@ from helper import get_file_extension, execute_shell_cmd
 import os
 from functools import reduce
 
-python_dependencies_for_build_dot_ninja = ['exec.py', 'target.py', 'ninja_generate.py', 'project_settings.py', 'helper.py']     
+python_dependencies_for_build_dot_ninja = ['make.py', 'target.py', 'ninja_generate.py', 'project_settings.py', 'helper.py']     
 
 def generate_build_dot_ninja_from_targets(targets, path_to_exec):
 

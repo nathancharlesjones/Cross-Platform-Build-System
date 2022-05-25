@@ -13,7 +13,6 @@ def main():
     if args.verbose:
         print(args)
 
-    # TODO: Test that all of the Docker stuff works on Linux, too
     if args.action == 'build_docker':
         cmd = ['docker', 'build', '-t', args.name, args.path]
         execute_shell_cmd(cmd, args.verbose)

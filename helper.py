@@ -8,7 +8,7 @@ def convert_list_to_str_for_printing(list, padding):
 def execute_shell_cmd(cmd, verbose):
     if verbose:
         print("Executing:", cmd)
-    process = subprocess.run(cmd, shell=True, text=True)
+    process = subprocess.run(cmd, text=True)
     if verbose and process.stdout:
         print("Output:", process.stdout)
     return process.stdout
