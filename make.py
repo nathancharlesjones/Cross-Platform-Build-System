@@ -45,11 +45,10 @@ def main():
     
     elif args.action == 'debug':
         # TODO: Test connecting to a GDB server on the host. Can I just add 2331:2331 to the port list?
-        # TODO: Possible to start a GDB server in the background? If not, add "start_gdb_server" action
         cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
-                '-p', '{0}:{0}'.format(default_debug_port_number), "--network='host'", args.name, '/bin/bash', \
+                '-p', '{0}:{0}'.format(args.port), args.name, '/bin/bash', \
                 '-c', "gdbgui -g {0} -r --port {1} --args {2}".format(targets[args.target].debugger, \
-                default_debug_port_number, targets[args.target].target_file_and_path)]
+                args.port, targets[args.target].target_file_and_path)]
         execute_shell_cmd(cmd, args.verbose)
     
     elif args.action == 'docker_bash':
@@ -74,18 +73,17 @@ def main():
         raise ValueError("Unknown action selected: {0}".format(args.action))
 
 def get_command_line_args():
-    # TODO: Update help strings
-    parser = argparse.ArgumentParser(description="Helper script for interacting with an embedded systems project. Run 'exec.py ACTION -h' for further help information about each action that can be run.")
+    parser = argparse.ArgumentParser(description="Helper script for interacting with an embedded systems project. Run 'make.py ACTION -h' for further help information about each action that can be run.")
     parser.add_argument('-v', '--verbose', action='store_true', default=False, help='Verbose output. (Note: Errors are shown regardless of this setting.)')
     subparsers = parser.add_subparsers(dest='action', required=True)
     
-    build_docker_container = subparsers.add_parser('build_docker', help="Builds the Docker container used with the 'run' and 'debug' actions.")
+    build_docker_container = subparsers.add_parser('build_docker', help="Builds the Docker container used to build and debug the project.")
     build_docker_container.add_argument('-p', '--path', default=default_path_to_docker_file, help="Path to Dockerfile to be used when building the Docker image; default is '{0}'.".format(default_path_to_docker_file))
     build_docker_container.add_argument('-n', '--name', default=default_docker_name, help="Name to be associated with the Docker image once built; default is '{0}'.".format(default_docker_name))
 
-    build_ninja_file = subparsers.add_parser('build_ninja', help='''(Re)Build the file 'build.ninja' according to the project specifications defined in 'project_targets.py'. Once generated, used "exec.py run -c 'ninja'" to use Docker to build all targets in the project.''')
+    build_ninja_file = subparsers.add_parser('build_ninja', help='''(Re)Build the file 'build.ninja' according to the project specifications defined in 'project_targets.py'. Once generated, used "make.py build_target" to use Docker to build all targets in the project.''')
 
-    list_targets = subparsers.add_parser('list', help="List all components of all available targets (specified in 'project_targets.py'). If '-t' is used, list all components of just the target specified after '-t'.")
+    list_targets = subparsers.add_parser('list', help="List ALL components of ALL available targets (specified in 'project_targets.py'). If '-t' is used, list all components of JUST the target specified after '-t'.")
     list_targets.add_argument('-t', '--target', nargs=1, choices=list(targets), default=list(targets), help="Target to be listed.")
 
     build_target = subparsers.add_parser('build_target', help="Build all of the project targets. If '-t' is used, build just the target specified after '-t'.")
