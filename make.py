@@ -43,7 +43,11 @@ def main():
         execute_shell_cmd(cmd, args.verbose)
     
     elif args.action == 'debug':
-        # TODO: Test connecting to a GDB server on the host. Can I just add 2331:2331 to the port list?
+        print("Open gdbgui by navigating a browser to 'localhost:PORT' (default: 5000).\n"
+              "Connect to a gdbserver that's running on the host by entering the following\n"
+              "at the gdb prompt:\n"
+              "    - For Mac/Windows: 'target extended-remote host.docker.internal:SERVER_PORT'\n"
+              "    - For Linux:       'target extended-remote 172.17.0.1:SERVER_PORT'")
         cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
                 '-p', '{0}:{0}'.format(args.port), args.name, '/bin/bash', \
                 '-c', "gdbgui -g {0} -r --port {1} --args {2}".format(targets[args.target].debugger, \
