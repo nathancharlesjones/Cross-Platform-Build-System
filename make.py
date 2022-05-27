@@ -105,7 +105,7 @@ def get_command_line_args():
     #clean.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is {0}.".format(default_docker_name))
     #clean.add_argument('-t', '--target', nargs=1, choices=list(targets), default=list(targets), help="Target to be built.")
 
-    start_debug_session = subparsers.add_parser('debug', help="Start a debug session in gdbgui with the specified target. After running, open a browser on the host machine and navigate to 'localhost:PORT' (default: {0}) to see the gdbgui instance.".format(default_debug_port_number))
+    start_debug_session = subparsers.add_parser('debug', help="Start a debug session in gdbgui with the specified target. After running, open a browser on the host machine and navigate to 'localhost:PORT' (default: {0}) to see the gdbgui instance. Start a gdb server on the host machine and connect to it using either (1) 'target extended-remote host.docker.internal:PORT' (for Windows/Mac) or (2) 'target extended-remote 172.17.0.1:PORT' (for Linux).".format(default_debug_port_number))
     start_debug_session.add_argument('-n', '--name', default=default_docker_name, help="Docker image to be used; default is '{0}'.".format(default_docker_name))
     start_debug_session.add_argument('-t', '--target', choices=list(targets), required=True, help="Target that is to be debugged.")
     start_debug_session.add_argument('-p', '--port', default=default_debug_port_number, help="Port number to be used to connect to gdbgui; default is {0}.".format(default_debug_port_number))
