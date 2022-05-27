@@ -1,5 +1,20 @@
 # Cross-Platform Build System with Ninja/Docker/Python
 
+## Contents
+
+1) [What is it?](https://github.com/nathancharlesjones/Cross-Platform-Build-System#what-is-it)
+2) [How does it work?](https://github.com/nathancharlesjones/Cross-Platform-Build-System#how-does-it-work)
+	- [Creating build.ninja](https://github.com/nathancharlesjones/Cross-Platform-Build-System#creating-buildninja)
+		- [`library` objects](https://github.com/nathancharlesjones/Cross-Platform-Build-System#library-objects)
+		- [`executable` objects](https://github.com/nathancharlesjones/Cross-Platform-Build-System#executable-objects)
+	- [Using Docker](https://github.com/nathancharlesjones/Cross-Platform-Build-System#using-docker)
+	- [Python CLI](https://github.com/nathancharlesjones/Cross-Platform-Build-System#python-cli)
+3) [How do I use it?](https://github.com/nathancharlesjones/Cross-Platform-Build-System#how-do-i-use-it)
+4) [References](https://github.com/nathancharlesjones/Cross-Platform-Build-System#references)
+	- [Ninja](https://github.com/nathancharlesjones/Cross-Platform-Build-System#ninja)
+	- [Docker](https://github.com/nathancharlesjones/Cross-Platform-Build-System#docker)
+	- [Misc](https://github.com/nathancharlesjones/Cross-Platform-Build-System#misc)
+
 ## What is it?
 
 An attempt to make a straightforward, cross-platform build system using Ninja, Docker, and Python.
@@ -19,70 +34,14 @@ The resulting system isn't perfect by any stretch of the imagination, but I *thi
 Three components work together to create this straightforward, cross-platform build system:
 
 1) The Python library `ninja_syntax` allows us to create a `build.ninja` file that defines how we want our project and each target to be built. Because it's Python, we can use standard Python syntax and data structures like dictionaries to easily define each target.
-2) Docker provides us with a consistent, cross-platform way to build our project. Additionally, using gdbgui we can debug our project from inside Docker (even if it's running on an MCU that's attached to the host machine with a USB debug adapter) without needing to recompile when moving between host OSes.
+2) Docker provides us with a consistent, cross-platform way to build our project. Additionally, using [gdbgui](https://www.gdbgui.com/) we can debug our project from inside Docker (even if it's running on an MCU that's attached to the host machine with a USB debug adapter) without needing to recompile when moving between host OSes.
 3) A Python CLI provides easy aliases for commonly needed commands.
 
 ### Creating build.ninja
 
-### Using Docker
 
-### Python CLI
 
-## How do I use it?
-
-GIF
-
-Check out [this sample project](https://github.com/nathancharlesjones/Python-Build-System-with-Ninja-Example) or follow the directions below:
-
-1) Clone this repo into your desired project folder. I.e.
-```
-. <-- Root project folder
-├── Python-Build-System
-│   ├── Dockerfile
-│   ├── README.md
-│   ├── helper.py
-│   ├── make.py
-│   ├── ninja_generate.py
-│   ├── example_project_settings.py
-│   └── target.py
-├── inc
-├── src
-└── Other project folders...
-```
-2) Set up docker:
-    - Inspect the Dockerfile to see if there are any additional programs you'll want. Only `build-essentials` is required for normal GCC projects (it includes `gcc`, `g++`, and `make`).
-    - The Dockerfile is hard-coded to download GCC 10.3; edit lines 30 and 31 to use a different version.
-    - Under "Notes" at the bottom, the Dockerfile also shows how to:
-    	- download other useful programs,
-    	- install a project dependency (like another git repo), and
-    	- modify the Dockerfile so that a specific command or program is run each time the Docker container starts up.
-    - Download and install [Docker](https://docs.docker.com/get-docker/). Ensure it is running.
-    - From a shell on your system, navigate to your project folder and run the command below, making the following substitutions:
-        - replace `Python-Build-System-with-Ninja` with the proper file path for these tools 
-        - replace `<NAME>` with the name you want to give your Docker image
-        - replace `<PATH>` with the path to the Dockerfile
-
-    `./make.py build_docker -n <NAME> -p <PATH>`
-    
-    - Wait. Building this Docker image takes a good 5-10 minutes on my system.
-3) Get the following dependencies:
-- ninja_syntax (run `pip3 install ninja_syntax`)
-- git (run `apt-get install -y git` on Linux/Mac or ` ` on Windows; only needed for the CLI action `push`)
-4) Create or edit `project_settings.py` to be of the following format:
-```
-import target
-
-default_path_to_docker_file = 'Python-Build-System-with-Ninja'
-default_docker_name = 'devenv-simple-build-system'
-default_debug_port_number = '5000'
-
-targets = {}
-
-# Define a new target, e.g. "new_library = target.library(...) or main = target.executable(...)"
-
-# Add the target to the dictionary of targets: targets[main.name] = main
-```
-5) The Python module `target.py` defines two types of targets: `library` and `executable`. A `library` target builds a static library and `executable` builds an executable binary. They accept the parameters below. Not all are required; `make.py` should warn you when something is missing that's required.
+The Python module `target.py` defines two types of targets: `library` and `executable`. A `library` target builds a static library and `executable` builds an executable binary. They accept the parameters below. Not all are required; `make.py` should warn you when something is missing that's required.
 
 #### `library` objects
 
@@ -131,11 +90,67 @@ targets = {}
 | local_dependencies | List of strings | No                                                 | List of `target.library` objects that this program is dependent on. These need to be the actual `target.library` objects as each objects' build method will be invoked by the program when this executable is being built, to ensure that all files are up to date. |
 | post_build_cmds    | List of strings | No                                                 | List of shell commands to be executed after building this project. Should be typed exactly as they would be in the shell, e.g. "./build/main".                                                                                                                |
 
-6) Create the `build.ninja` file (used by ninja in order to build your project) by running the following command from the project's root folder:
+### Using Docker
+
+### Python CLI
+
+## How do I use it?
+
+Check out [this sample project](https://github.com/nathancharlesjones/Cross-Platform-Build-System-Example) or follow the directions below:
+
+1) Clone this repo into your desired project folder. I.e.
+```
+. <-- Root project folder
+├── Python-Build-System
+│   ├── Dockerfile
+│   ├── README.md
+│   ├── helper.py
+│   ├── make.py
+│   ├── ninja_generate.py
+│   ├── example_project_settings.py
+│   └── target.py
+├── inc
+├── src
+└── Other project folders...
+```
+2) Set up docker:
+    - Inspect the Dockerfile to see if there are any additional programs you'll want. Only `build-essentials` is required for normal GCC projects (it includes `gcc`, `g++`, and `make`).
+    - The Dockerfile is hard-coded to download GCC 10.3; edit lines 30 and 31 to use a different version.
+    - Under "Notes" at the bottom, the Dockerfile also shows how to:
+    	- download other useful programs,
+    	- install a project dependency (like another git repo), and
+    	- modify the Dockerfile so that a specific command or program is run each time the Docker container starts up.
+    - Download and install [Docker](https://docs.docker.com/get-docker/). Ensure it is running.
+    - From a shell on your system, navigate to your project folder and run the command below, replacing `Cross-Platform-Build-System` with the path to `make.py` for your system.
+    	- If you make that change, you'll also need to tell Docker where to find the Dockerfile. By default, the Python CLI assumes the Dockerfile is inside a folder called `Cross-Platform-Build-System`, as defined in `project_settings.py` (see below). You can either edit the default value for the path in `project_settings.py` or you can run the command with `-p CORRECT_PATH_TO_DOCKERFILE`.
+    	- Additionally, you can change the name for your Docker image by either editing the default value in `project_settings.py` (see below) or you can run the command with `-n DIFFERENT_NAME`.
+
+    `./Cross-Platform-Build-System/make.py build_docker`
+    
+    - Wait. Building this Docker image takes a good 5-10 minutes on my system.
+3) Get the following dependencies on your host machine:
+- ninja_syntax (run `pip3 install ninja_syntax`)
+- [git](https://git-scm.com/downloads)
+4) Create or edit `project_settings.py` to be of the following format:
+```
+import target
+
+default_path_to_docker_file = 'Cross-Platform-Build-System'
+default_docker_name = 'devenv-simple-build-system'
+default_debug_port_number = '5000'
+
+targets = {}
+
+# Define a new target, e.g. "new_library = target.library(...) or main = target.executable(...)"
+
+# Add the target to the dictionary of targets: targets[main.name] = main
+```
+You can find an example settings file above (`example_project_settings.py`) or [here](https://github.com/nathancharlesjones/Cross-Platform-Build-System-Example/project_settings.py).
+5) Create the `build.ninja` file (used by ninja in order to build your project) by running the following command from the project's root folder:
 
 `./make.py build_ninja`
 
-7) Build, debug, and interact with your project to your heart's content. Running `./make.py -h` will show you the text below, which lists the other available commands in `make.py`. These include the ability to:
+6) Build, debug, and interact with your project to your heart's content. Running `./make.py -h` will show you the text below, which lists the other available commands in `make.py`. These include the ability to:
 - list the targets defined in `project_settings.py` (`list`), 
 - build one or all of the targets (`build_target`),
 - clean the build directory (`clean`),
@@ -169,7 +184,7 @@ options:
   -h, --help            show this help message and exit
   -v, --verbose         Verbose output. (Note: Errors are shown regardless of this setting.)
 ```
-8) Later on, feel free to edit or extend `make.py`! It's just a Python script, after all. It's basically begging for someone to add additional command-line flags that utilize things like [pyOCD](https://github.com/pyocd/pyOCD), [pyGDB](https://pypi.org/project/pygdb/), [pyLink](https://pylink.readthedocs.io/en/latest/), or [pyFTDI](https://eblot.github.io/pyftdi/) to create a singular command-line interface for all of your developing, debugging, and testing needs. Alternatively, you could cut out the parts of this project you like (such as using ninja) and leave the rest behind (such as Docker or the Python CLI); they're each independent of the other, more or less.
+7) Later on, feel free to edit or extend `make.py`! It's just a Python script, after all. It's basically begging for someone to add additional command-line flags that utilize things like [pyOCD](https://github.com/pyocd/pyOCD), [pyGDB](https://pypi.org/project/pygdb/), [pyLink](https://pylink.readthedocs.io/en/latest/), or [pyFTDI](https://eblot.github.io/pyftdi/) to create a singular command-line interface for all of your developing, debugging, and testing needs. Alternatively, you could cut out the parts of this project you like (such as using ninja) and leave the rest behind (such as Docker or the Python CLI); they're each independent of the other, more or less.
 
 ## References
 
