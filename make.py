@@ -1,12 +1,19 @@
 #! /usr/bin/env python3
 
+import os
+import sys
+
+# Allow Python to find 'project_settings.py'. Assumes 'project_settings.py' is in
+# the folder one level higher than 'make.py'.
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+#print(os.path.join(os.path.dirname(__file__), '..'))
+
 from project_settings import (targets, default_path_to_docker_file, default_docker_name,
                                 default_debug_port_number)
 from helper import execute_shell_cmd
 from ninja_generate import generate_build_dot_ninja_from_targets
 import argparse
-import os
-import sys
 
 def main():
     args = get_command_line_args()
@@ -19,6 +26,9 @@ def main():
     
     elif args.action == 'build_ninja':
         generate_build_dot_ninja_from_targets(targets, sys.argv[0])
+        #cmd = ['docker', 'run', '-it', '--rm', '-v', '{0}:/app'.format(os.getcwd()), \
+        #        args.name, '/bin/bash', '-c', './ninja_generate.py']
+        #execute_shell_cmd(cmd, args.verbose)
     
     elif args.action == 'list':
         for target in args.target:
