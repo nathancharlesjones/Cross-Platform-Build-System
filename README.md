@@ -40,7 +40,7 @@ Three components work together to create this straightforward, cross-platform bu
 2) Docker provides us with a consistent, cross-platform way to build our project. Additionally, using [gdbgui](https://www.gdbgui.com/) we can debug our project from inside Docker (even if it's running on an MCU that's attached to the host machine with a USB debug adapter) without needing to recompile when moving between host OSes. (Of coure, if you're more comfortable using command-line gdb or the slightly-more-user-friendly [TUI mode](https://undo.io/resources/gdb-watchpoint/5-ways-reduce-debugging-hours/), you can edit `make.py` so that the `debug` action starts plain `gdb` instead of `gdbgui`.)
 3) A Python CLI provides easy aliases for commonly needed commands.
 
-After setting up your system, you'll just need to create a file called `project_settings.py` (like [this one](https://github.com/nathancharlesjones/Cross-Platform-Build-System-Example/project_settings.py)) to describe how you want your project to be built, and then run:
+After setting up your system, you'll just need to create a file called `project_settings.py` (like [this one](https://github.com/nathancharlesjones/Cross-Platform-Build-System-Example/project_settings.py)) in your root project folder to describe how you want your project to be built, and then run:
 - `./make.py build_ninja` to make the build.ninja file,
 - `./make.py build_target` to make all of the targets defined in `project_settings.py`, and
 - `./make.py debug -t <TARGET>` to start gdbgui for debugging `<TARGET>`.
@@ -98,9 +98,11 @@ targets = {}
 
 # Add the target to the dictionary of targets: targets[main.name] = main
 ```
+All file paths should use the Unix-style forward slashes to separate directories (since it will be the Docker image, configured as an Ubuntu image, that will use the file paths to consume the source files).
+
 You can find an example settings file above (`example_project_settings.py`) or [here](https://github.com/nathancharlesjones/Cross-Platform-Build-System-Example/project_settings.py). Follow these links for more information about the available or required properties for your [`library`](https://github.com/nathancharlesjones/Cross-Platform-Build-System#library-objects) and [`executable`](https://github.com/nathancharlesjones/Cross-Platform-Build-System#executable-objects) projects.
 
-5) Create the `build.ninja` file (used by ninja in order to build your project) by running the following command from the project's root folder:
+5) Create the `build.ninja` file (used by ninja in order to build your project) by running the following command:
 
 `./make.py build_ninja`
 
