@@ -6,7 +6,7 @@ import sys
 # Allow Python to find 'project_settings.py'. Assumes 'project_settings.py' is in
 # the folder one level higher than 'make.py'.
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+#sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 #print(os.path.join(os.path.dirname(__file__), '..'))
 
 from project_settings import (targets, default_path_to_docker_file, default_docker_name,
