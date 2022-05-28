@@ -40,10 +40,10 @@ Three components work together to create this straightforward, cross-platform bu
 2) Docker provides us with a consistent, cross-platform way to build our project. Additionally, using [gdbgui](https://www.gdbgui.com/) we can debug our project from inside Docker (even if it's running on an MCU that's attached to the host machine with a USB debug adapter) without needing to recompile when moving between host OSes. (Of coure, if you're more comfortable using command-line gdb or the slightly-more-user-friendly [TUI mode](https://undo.io/resources/gdb-watchpoint/5-ways-reduce-debugging-hours/), you can edit `make.py` so that the `debug` action starts plain `gdb` instead of `gdbgui`.)
 3) A Python CLI provides easy aliases for commonly needed commands.
 
-After setting up your system, you'll just need to create a file called `project_settings.py` (like [this one](https://github.com/nathancharlesjones/Cross-Platform-Build-System-Example/project_settings.py)) in your root project folder to describe how you want your project to be built, and then run:
-- `./make.py build_ninja` to make the build.ninja file,
-- `./make.py build_target` to make all of the targets defined in `project_settings.py`, and
-- `./make.py debug -t <TARGET>` to start gdbgui for debugging `<TARGET>`.
+After setting up your system, you'll just need to create a file called `project_settings.py` (like [this one](https://github.com/nathancharlesjones/Cross-Platform-Build-System-Example/project_settings.py)) in your root project folder to describe how you want your project to be built, and then run the following from the project root (replacing `./Cross-Platform-Build-System` with the proper path to `make.py`:
+- `./Cross-Platform-Build-System/make.py build_ninja` to make the build.ninja file,
+- `./Cross-Platform-Build-System/make.py build_target` to make all of the targets defined in `project_settings.py`, and
+- `./Cross-Platform-Build-System/make.py debug -t <TARGET>` to start gdbgui for debugging `<TARGET>`.
 
 See [How do I use it?](https://github.com/nathancharlesjones/Cross-Platform-Build-System#how-do-i-use-it) for more information about how to connect gdbgui to an MCU and other features of the Python CLI.
 
@@ -54,7 +54,7 @@ Check out [this sample project](https://github.com/nathancharlesjones/Cross-Plat
 1) Clone this repo into your desired project folder. I.e.
 ```
 . <-- Root project folder
-├── Python-Build-System
+├── Cross-Platform-Build-System
 │   ├── Dockerfile
 │   ├── README.md
 │   ├── example_project_settings.py
@@ -66,6 +66,10 @@ Check out [this sample project](https://github.com/nathancharlesjones/Cross-Plat
 ├── src
 └── Other project folders...
 ```
+If you decide to put it anywhere other than that, just be sure to make the following changes:
+    - In `project_settings.py`: Edit line 3, which defines `default_path_to_docker_file`, with the proper path to `Dockerfile` *starting from the location of `project_settings.py`*.
+    - In `ninja_generate.py`: Edit line 6 with the proper path to `project_settings.py` *starting from the location of `ninja_generate.py`*.
+    - In `make.py`: Edit line 8 to create the proper path to `project_settings.py` *starting from the location of `make.py`*.
 2) Set up docker:
     - Inspect the Dockerfile to see if there are any additional programs you'll want. Only `build-essentials` is required for normal GCC projects (it includes `gcc`, `g++`, and `make`).
     - The Dockerfile is hard-coded to download GCC 10.3; edit lines 30 and 31 to use a different version.
@@ -104,9 +108,9 @@ You can find an example settings file above (`example_project_settings.py`) or [
 
 5) Create the `build.ninja` file (used by ninja in order to build your project) by running the following command:
 
-`./make.py build_ninja`
+`./Cross-Platform-Build-System/make.py build_ninja`
 
-6) Build, debug, and interact with your project to your heart's content. Running `./make.py -h` will show you the text below, which lists the other available commands in `make.py`. These include the ability to:
+6) Build, debug, and interact with your project to your heart's content. Running `./Cross-Platform-Build-System/make.py -h` will show you the text below, which lists the other available commands in `make.py`. These include the ability to:
 - list the targets defined in `project_settings.py` (`list`), 
 - build one or all of the targets (`build_target`),
 - clean the build directory (`clean`),
@@ -216,7 +220,7 @@ I did my best to comment the `ninja_generate.py` file to explain how it works, s
 For information about what Docker is or why it's useful for a cross-platform build system, see [Container-ize Your Build Environment: Advantages of Docker For Firmware Development](https://www.embeddedonlineconference.com/theatre/Advantages_of_Docker_For_Firmware_Development) by Akbar Dhanaliwala.
 
 This project uses Docker in the exact same way as that conference talk, with the added ability to use gdbgui (or plain gdb, if you prefer) to debug an MCU attached to the host machine. Doing so requires three things:
-- the Docker image has to publish the same port that gdbgui is using to the host machine (`-p <PORT>:<PORT>`),
+- the Docker image has to publish the same port that gdbgui is using to the host machine (`-p <PORT>:<PORT>`; not required if you only want to use vanilla gdb/gdb in TUI mode),
 - gdbgui has to be started in `remote` mode (`-r`), and
 - gdbgui (or gdb) has to connect to the gdb server running on the host machine using the IP address `host.docker.internal:PORT` (for Windows/Mac) or `172.17.0.1:PORT` (for Linux).
 
