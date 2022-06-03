@@ -70,13 +70,13 @@ Check out [this sample project](https://github.com/nathancharlesjones/Cross-Plat
 ├── src
 └── Other project folders...
 ```
-If you decide to put it anywhere other than that, just be sure to make the following changes:
+    If you decide to put it anywhere other than that, just be sure to make the following changes:
 
-- In `project_settings.py`: Edit line 3, which defines `default_path_to_docker_file`, with the proper path to `Dockerfile` *starting from the location of project_settings.py*.
+    - In `project_settings.py`: Edit line 3, which defines `default_path_to_docker_file`, with the proper path to `Dockerfile` *starting from the location of project_settings.py*.
 
-- In `ninja_generate.py`: Edit line 6 with the proper path to `project_settings.py` *starting from the location of ninja_generate.py*.
+    - In `ninja_generate.py`: Edit line 6 with the proper path to `project_settings.py` *starting from the location of ninja_generate.py*.
 
-- In `make.py`: Edit line 8 to create the proper path to `project_settings.py` *starting from the location of make.py*.
+    - In `make.py`: Edit line 8 to create the proper path to `project_settings.py` *starting from the location of make.py*.
 
 2) Set up docker:
 
