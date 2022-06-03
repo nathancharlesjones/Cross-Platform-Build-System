@@ -20,6 +20,8 @@
 
 ## What is it?
 
+![](https://github.com/nathancharlesjones/Cross-Platform-Build-System/blob/main/docs/00_System-context-diagram.drawio.png)
+
 An attempt to make a straightforward, cross-platform build system using Ninja, Docker, and Python.
 
 The build system I *had* been using was less-than-ideal for two reasons:
@@ -33,6 +35,8 @@ The resulting system isn't perfect by any stretch of the imagination, but I *thi
 - load those artifacts onto an MCU and debug it, also in a consistent, cross-platform manner (using Docker + gdbgui).
 
 ## How does it work?
+
+![](https://github.com/nathancharlesjones/Cross-Platform-Build-System/blob/main/docs/01_Container-diagram.drawio.png)
 
 Three components work together to create this straightforward, cross-platform build system:
 
