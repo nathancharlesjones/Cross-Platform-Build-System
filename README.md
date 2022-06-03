@@ -71,24 +71,39 @@ Check out [this sample project](https://github.com/nathancharlesjones/Cross-Plat
 └── Other project folders...
 ```
 If you decide to put it anywhere other than that, just be sure to make the following changes:
+
     - In `project_settings.py`: Edit line 3, which defines `default_path_to_docker_file`, with the proper path to `Dockerfile` *starting from the location of `project_settings.py`*.
+
     - In `ninja_generate.py`: Edit line 6 with the proper path to `project_settings.py` *starting from the location of `ninja_generate.py`*.
+
     - In `make.py`: Edit line 8 to create the proper path to `project_settings.py` *starting from the location of `make.py`*.
+
 2) Set up docker:
+
     - Inspect the Dockerfile to see if there are any additional programs you'll want. Only `build-essentials` is required for normal GCC projects (it includes `gcc`, `g++`, and `make`).
+
     - The Dockerfile is hard-coded to download GCC 10.3; edit lines 30 and 31 to use a different version.
+
     - Under "Notes" at the bottom, the Dockerfile also shows how to:
+
     	- download other useful programs,
+
     	- install a project dependency (like another git repo), and
+
     	- modify the Dockerfile so that a specific command or program is run each time the Docker container starts up.
+
     - Download and install [Docker](https://docs.docker.com/get-docker/). Ensure it is running.
+
     - From a shell on your system, navigate to your project folder and run the command below, replacing `Cross-Platform-Build-System` with the path to `make.py` for your system.
+
     	- If you make that change, you'll also need to tell Docker where to find the Dockerfile. By default, the Python CLI assumes the Dockerfile is inside a folder called `Cross-Platform-Build-System`, as defined in `project_settings.py` (see below). You can either edit the default value for the path in `project_settings.py` or you can run the command with `-p CORRECT_PATH_TO_DOCKERFILE`.
+
     	- Additionally, you can change the name for your Docker image by either editing the default value in `project_settings.py` (see below) or you can run the command with `-n DIFFERENT_NAME`.
 
     `./Cross-Platform-Build-System/make.py build_docker`
     
     - Wait. Building this Docker image takes a good 5-10 minutes on my system.
+    
 3) Get the following dependencies on your host machine:
 - ninja_syntax (run `pip3 install ninja_syntax`)
 - [git](https://git-scm.com/downloads)
