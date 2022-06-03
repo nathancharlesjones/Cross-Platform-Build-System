@@ -7,8 +7,16 @@ import sys
 # the folder one level higher than 'make.py'.
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from project_settings import (targets, default_path_to_docker_file, default_docker_name,
-                                default_debug_port_number)
+try:
+    from project_settings import (targets, default_path_to_docker_file, default_docker_name,
+                                    default_debug_port_number)
+except:
+    print("Could not locate project_settings.py.")
+    targets = {}
+    default_path_to_docker_file = '.'
+    default_docker_name = 'no-name'
+    default_debug_port_number = '9999'
+
 from helper import execute_shell_cmd
 from ninja_generate import generate_build_dot_ninja_from_targets
 import argparse

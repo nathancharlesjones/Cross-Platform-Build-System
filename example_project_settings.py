@@ -1,5 +1,9 @@
 import target
 
+default_path_to_docker_file = 'Cross-Platform-Build-System'
+default_docker_name = 'devenv-simple-build-system'
+default_debug_port_number = '5000'
+
 targets = {}
 
 libtest_name = "libtest"
